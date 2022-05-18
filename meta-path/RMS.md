@@ -1,4 +1,7 @@
 <img src="http://latex.codecogs.com/gif.latex?\sqrt{\sum\limits_{i=1}^{n}(x_{i}-y_{i})^2}" />
+
+
+
 ![](http://latex.codecogs.com/gif.latex?\sqrt{\sum\limits_{i=1}^{n}(x_{i}-y_{i})^2})
 
 # RMS
@@ -133,14 +136,14 @@
 
 - State（状态空间）：在游戏的每个决策点上，每个玩家以自己的角度能够观察到的当前状态的所有信息。以下以 **字典** 的形式呈现状态结构。
 
-  ![image-20220513134837083](C:\Users\HP\AppData\Roaming\Typora\typora-user-images\image-20220513134837083.png)
+  ![image-20220513134837083](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205181725667.png)
 
 
 
 - Action（动作空间）：54张牌，根据不同的牌的组合可有27472种组合。在新版的RlCard里，出牌的动作空间有27472种，分别编码0-27471。在旧版的RlCard里，出牌的动作空间被抽象成309种，抽象过程：例如：“33344”被抽象为“333 **”。
 - Action Encoding：54-d one-hot vector
 
-![image-20220513135040258](C:\Users\HP\AppData\Roaming\Typora\typora-user-images\image-20220513135040258.png)
+![image-20220513135040258](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205181725488.png)
 
 
 
@@ -155,46 +158,6 @@
 
 
 - 1. 每位研一同学选定2～3篇参考文献（近三年顶级），作为开题和硕士论文的重要参考。2. 从文献中抽取出研究的问题，下次例会详细汇报。要给出问题的形式化定义（即数学模型）、具体案例或应用场景（即举例说明该问题的研究意义）。3. 一个规范：在ppt或文档中提及论文时，要按照参考文献的格式给出完整信息。
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
