@@ -3,7 +3,7 @@
 ## 设置root密码
 
 ```
-sodu passwd root
+sudo passwd root
 ```
 
 
@@ -166,5 +166,39 @@ tty -s&&mesg n || true
 
 ```
 reboo
+```
+
+## Ubuntu20.04不能上网，VM虚拟机，ens33网卡没起来
+
+1、使用 ifconfig 命令查看网卡信息，发现没有ens33网卡，有ens33网卡，上面的地址也获取的不对
+
+```
+ifconfig
+```
+
+2、使用 dhclient 命令重新获取 ip 地址，需要管理员权限，输入密码后确定执行，再使用 ifconfig 查看。
+
+```
+sudo dhclient
+```
+
+3、再使用 ifconfig 查询，如果 nes33 网卡还是没有出现，需要手动用命令启动 sudo ifconfig ens33 up ，再使用 ifconfig 查看。
+
+```
+sudo ifconfig ens33 up
+```
+
+
+
+## 如何给用户赋予操作某个文件夹的权限
+
+```
+su -l root
+
+# 更改文件夹的用户为 user1
+chown -R user1:user1 dirname
+
+# 修改user1对文件夹的权限
+chmod 755 dirname
 ```
 
