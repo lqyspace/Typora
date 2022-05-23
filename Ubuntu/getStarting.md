@@ -202,3 +202,154 @@ chown -R user1:user1 dirname
 chmod 755 dirname
 ```
 
+
+
+## 如何设置或者更改时区在Ubuntu20.04
+
+`timedatectl` 是用于查询和改变系统时钟以及市区，开启或者禁用时间同步的服务。
+
+
+
+### 系统时区
+
+`timedatectl` 是一个命令行程序，可以让您查看和更改系统的时间和日期。它在所有的基于现代system的Linux系统上都可用，包括Ubuntu20.04。
+
+
+
+在调用 `timedatectl` 命令不使用任何参数时，`timedatectl` 将打印系统的时区。如果安装系统时没有设置时区，系统将使用默认的**UTC**时区。
+
+
+
+以下`timedatectl`命令将会打印系统的时区和所在时区的当前时间。并显示系统时钟服务同步以及NTP服务的状态：
+
+```
+timedatectl
+```
+
+```
+		        Local time: Wed 2020-05-06 19:33:20 UTC
+           Universal time: Wed 2020-05-06 19:33:20 UTC
+                 RTC time: Wed 2020-05-06 19:33:22    
+                Time zone: UTC (UTC, +0000)           
+System clock synchronized: yes                         
+              NTP service: active                      
+          RTC in local TZ: no 
+```
+
+
+
+上面的 `timedatectl`命令输出，可以注意到系统使用的UTC时区。如果这与你所在的时区不一致。可以继续使用`timedatectl`修改系统时区。
+
+
+
+### 更改时区
+
+更改时区之前，您需要找出与你当前时区匹配的时区的长名称。长时区的名称使用`地区/城市`格式作为命名。
+
+
+
+如你不知道你所处位置的时区长名称，可以通过使用`timedatectl`命令的`list-timezones`选项列出全世界所有可用的时区。
+
+
+
+通常`timedatectl`命令会打印所有时区。我们将`timedatectl`列出的时区名称通过管道传递给grep命令过滤时区名称。
+
+
+
+在本教程中，我们将使用`亚洲/上海`的时区作为系统的时区。我将大概知道长时区的名称中将包含`shanghai`的字符。此时我么使用`shanghai`作为`grep`的关键词过滤即可找到上海的时区。
+
+
+
+以下`timedatectl`命令打印所有时区，然后通过管道传递grep命令不区分大小写搜索包含括`shang`关键词的时区：
+
+```
+timedatectl list-timezones | grep -i shang
+```
+
+该命令将打印以下输出：
+
+```
+Asia/Shanghai
+```
+
+
+
+现在，已经找到所在位置的时区长名称。
+
+我们就可以使用`timedatectl`的`set-timezone`选项设置系统的时区，并在`set-timezone`选项之后传递长时区名称。
+
+请以root或[具有sudo权限的用户](https://www.myfreax.com/how-to-add-user-to-sudoers-in-ubuntu/)运行以下`timedatectl`命令设置系统的时区为`Asia/Shanghai`：
+
+
+
+再次不带任何选项参数调用`timedatectl`命令，打印系统当前设置的时区即可：
+
+```
+timedatectl
+```
+
+```
+               Local time: Wed 2020-05-06 15:41:42 EDT  
+           Universal time: Wed 2020-05-06 19:41:42 UTC  
+                 RTC time: Wed 2020-05-06 19:41:48      
+                Time zone: America/New_York (EDT, -0400)
+System clock synchronized: yes                         
+              NTP service: active                      
+          RTC in local TZ: no   
+
+```
+
+
+
+
+
+### 软链接修改系统时区
+
+Linux系统使用`/etc/localtime`文件存储着系统的时区，它是一个[软链接](https://www.myfreax.com/how-to-create-a-sudo-user-on-ubuntu/)/[符号链接](https://www.myfreax.com/how-to-create-a-sudo-user-on-ubuntu/)文件。它指向`/usr/share/zoneinfo/`目录以及子目录下的时区文件。
+
+
+
+这些时区文件以二进制的存储着时区的信息。当应用程序需要用户展示时区时。应用程序将读取`/etc/localtime`最终指向的二进制时区文件。
+
+
+
+因此，我们还可以通过修改`/etc/localtime`[符号链接](https://www.myfreax.com/how-to-create-a-sudo-user-on-ubuntu/)最终指向的二进制时区文件来配置系统的时区。也可以使用`ls`命令查看当前时区。
+
+
+
+以ls命令将打印`/etc/localtime`所有信息，你会看到`/etc/localtime`文件的类型是符号链接，并指向`/usr/share/zoneinfo/Hongkong`。
+
+```
+ls -al /etc/localtime
+```
+
+```
+lrwxrwxrwx 1 root root 28 5月  12 19:03 /etc/localtime -> /usr/share/zoneinfo/Hongkong
+```
+
+现在已经确定了系统所有使用的时区。假如我们将时区更改为上海。可使用ln命令直接改变`/etc/localtime`指向的二进制时区文件修改系统时区。
+
+
+
+如你不确定所在位置的时区名称，可使用`find . -iname "你时区关键字*"`命令搜索时区名称的关键字，`i`表示不区分大小写。
+
+`find`命令将列出所有可能包含时区名称的关键字的二进制时区。这些文件都可用于使用`ln`命令设置系统的时区。
+
+
+
+以下`ln`命令修改/创建文件`/usr/share/zoneinfo/Asia/Shanghai`到`/etc/localtime`的软链接：
+
+```
+sudo ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+```
+
+如果如果你需要验证系统时区是否成功修改或者设置。可使用`date`命令打印当前系统的时间。当时区发生变化，`date`命令时间也将会更改。
+
+
+
+以下date命令将会打印系统的当前时间：
+
+```
+date
+```
+
