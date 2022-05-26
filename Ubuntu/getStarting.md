@@ -90,7 +90,7 @@ apt install ssh
 可以通过SSH配置文件更改端口，是否允许root登录等设置，配置文件位置如下：
 
 ```
-/etc/ssh/sshd_config
+vi /etc/ssh/sshd_config
 ```
 
 默认是不允许root远程登录的，通过修改配置文件：
@@ -143,6 +143,16 @@ allow-guest=false #不允许guest登录（可选）
 ````
 vi /etc/pam.d/gdm-password
 ````
+
+在第三行前面加#以注释掉auth required pam_succeed_if.so user != root quiet_success，随后保存并退出
+
+
+
+> 修改gdm-autologin
+
+```
+vi /etc/pam.d/gdm-autologin
+```
 
 在第三行前面加#以注释掉auth required pam_succeed_if.so user != root quiet_success，随后保存并退出
 
@@ -353,3 +363,24 @@ sudo ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 date
 ```
 
+
+
+## 无法连接虚拟设备 sata0:1,因为主机上没有相对应的设备——解决方案
+
+**其实并不复杂，就两个步骤，你装完虚拟机之后什么也别干，如若开虚拟机或虚拟机里面的系统时，出现标题状况，则可以这样解决：**
+
+1.点击虚拟机，再点击左侧页面编辑虚拟机设置。
+
+![image-20220526010503059](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205260105433.png)
+
+
+
+2.选择CD/DVD(IDE)将使用物理驱动器的选项改为下方的使用ISO映像文件，选择映像文件的位置即可，再重新启动虚拟机，就可以了。
+
+![image-20220526010535181](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205260105236.png)
+
+
+
+3.如果不成功就把启动时连接去掉再试试
+
+![image-20220526010716190](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205260107307.png)
