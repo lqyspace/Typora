@@ -21,7 +21,7 @@
 
 Trojan是一个比较新的翻墙软件，在设计时采用了更适应国情的思路。在穿透GFW时，人们认为强加密和随机混淆可能会欺骗GFW的过滤机制。然而，Trojan实现了这个思路的反面：它模仿了互联网上最常见的HTTPS协议，以诱骗GFW认为它就是HTTPS，从而不被识别。
 
-![](D:/Boostnote%E7%AC%94%E8%AE%B0/img/VPN/4.png)
+![](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205261130850.png)
 
 如图所示，Trojan工作在443端口，并且处理来自外界的HTTPS请求，如果是合法的Trojan请求，那么为该请求提供服务，否则将该流量转交给web服务器Nginx，由Nginx为其提供服务。基于这个工作过程可以知道，Trojan的一切表现均与Nginx一致，不会引入额外特征，从而达到无法识别的效果。当然，为了防止恶意探测，我们需要将80端口的流量全部重定向到443端口，并且服务器只暴露80和443端口，这样可以使得服务器与常见的Web服务器表现一致。
 
@@ -39,7 +39,7 @@ Trojan是一个比较新的翻墙软件，在设计时采用了更适应国情�
 
 在购买服务器之前需要先充值。登陆vultr之后如图Billing->Alipay，选好要充值的金额数，然后Pay with Alipay即可跳转到支付宝扫码支付页面。
 
-![](D:/Boostnote%E7%AC%94%E8%AE%B0/img/VPN/5.png)
+![](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205261131444.png)
 
 ### 购买服务器
 
@@ -53,11 +53,11 @@ Trojan是一个比较新的翻墙软件，在设计时采用了更适应国情�
 
 第二个选项为选择服务器地址（Server Location），建议选择硅谷（Silicon Valley，离google最近），而不要选择日本（用的人多，大部分IP已经被墙）；
 
-![](D:/Boostnote%E7%AC%94%E8%AE%B0/img/VPN/8.png)
+![](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205261131720.png)
 
 第三个选项为选择服务器类型（Server Type），即选择服务器操作系统。作为示例，这里我们选择选择 **Ubuntu 18.10 x64（强烈推荐）**，不过系统要求部分所列出的操作系统均已测试通过，同一个发行版本的系统在我要求以下的版本测试不通过。注意如果你使用其他vps服务商的vps，可能有minimal选项，不能选择那一个，很多依赖乃没有安装，会导致自己配置失败（当然也可以，缺少哪个依赖自己再用apt安装就好了，例如：``apt install -y sudo，sudo apt install -y vim``等）。最后，如果你确实是有其他系统或者比较旧的系统版本需要安装trojan的话，建议使用docker，正文中部分配置只需要做细微修改即可，为了文章的整体性我就不放在正文了，请参考评论区。
 
-![](D:/Boostnote%E7%AC%94%E8%AE%B0/img/VPN/9.png)
+![](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205261131395.png)
 
 第四个选项为选择服务器大小（Server Size），即选择服务器硬件性能。因为我们使用VPS服务器翻墙，所以性能瓶颈不在配置，而在网络带宽之类的。由于vultr的服务器带宽都是100M的，所以服务器当然是往便宜了选。当然，``$2.5/mo``的一般都是缺货的。选择``$5/mo``的就好，一个月三十几块钱，要是有好几个人一起分担的话就相当实惠了。
 
@@ -69,13 +69,13 @@ Trojan是一个比较新的翻墙软件，在设计时采用了更适应国情�
 
 此时可以点击右下角的现在部署（Deploy Now），vultr即开始分配资源，安装系统。此时Servers页面可以看到服务器信息，状态显示installing。当状态切换为Running的时候，服务器就可以使用了。
 
-![](D:/Boostnote%E7%AC%94%E8%AE%B0/img/VPN/11.png)
+![](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205261131572.png)
 
 ### 服务器信息查看
 
 服务器安装结束之后在Servers页面点击刚才购买的服务器名字即可跳转到服务器详情页。如图右上角有一个View console可以直接通过网页连接到服务器，但是由于它不支持复制粘贴，不方便，我们需要使用第三方工具连接到服务器。所以需要知道IP、用户名和密码，如图左下角。
 
-![](D:/Boostnote%E7%AC%94%E8%AE%B0/img/VPN/12.png)
+![](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205261131468.png)
 
 ## 域名申请与解析
 
@@ -403,7 +403,7 @@ acme.sh --issue -d <tdom.ml> -w /var/www/acme-challenge
 
 看到下图的提示表示证书申请成功。
 
-![](D:/Boostnote%E7%AC%94%E8%AE%B0/img/VPN/18.png)
+![](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205261132456.png)
 
 **申请失败怎么办**？ 证书申请失败的可能性一般有：1. 文件夹权限问题，请仔细检查每一步是否都正确；2. 证书申请次数超限，此时**切忌反复尝试**。证书每一个周申请次数是有限制的（20次），如果超限了就需要等一个周或者更换域名了（这个限制是争对每一个子域单独做的限制，所以万一超限了还可以用子域名继续部署）。解决方案是：在上述命令后加``--staging``参数继续测试。测试通过之后，删除上图所示四个证书文件以及该域名对应文件夹并取消 ``--staging`` 参数再执行一次。``--staging`` 参数申请的证书只作为测试用，客户端是无法认证通过的（提示``SSL handshake failed: tlsv1 alert unknown ca``），所以使用 ``--staging`` 参数申请到了证书之后要去掉 ``--staging`` 参数重新申请一次。
 
@@ -461,7 +461,7 @@ sudo nano /etc/systemd/system/trojan.service
 
 添加用户效果如图所示，注意等号旁边没有空格。
 
-![](D:/Boostnote%E7%AC%94%E8%AE%B0/img/VPN/20.png)
+![](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205261132530.png)
 
 然后重新加载配置文件。
 
