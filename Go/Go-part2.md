@@ -722,9 +722,57 @@ func main(){
 
 
 
+## if 嵌套语句
+
+实例：
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+   /* 定义局部变量 */
+   var a int = 100
+   var b int = 200
+ 
+   /* 判断条件 */
+   if a == 100 {
+       /* if 条件语句为 true 执行 */
+       if b == 200 {
+          /* if 条件语句为 true 执行 */
+          fmt.Printf("a 的值为 100 ， b 的值为 200\n" );
+       }
+   }
+   fmt.Printf("a 值为 : %d\n", a );
+   fmt.Printf("b 值为 : %d\n", b );
+}
+```
 
 
 
+## switch语句
+
+1、switch语句用于基于不同条件执行不同的动作，每个case分值都是唯一的，从上到下逐一测试直到匹配为止。
+
+2、switch语句执行的过程是从上到下，直到找到匹配项，匹配项后面也不需要再加 break；
+
+3、switch默认情况下case最后自带break语句，匹配成功后就不会执行其他的 case，如果我们需要执行后面的 case，可以使用 `fallthrough` 。
+
+4、default 语句是在没有case匹配上的时候执行。
+
+**语法格式：**
+
+```go
+switch var1 {
+    case val1:
+        ...
+    case val2:
+        ...
+    default:
+        ...
+}
+```
 
 
 
