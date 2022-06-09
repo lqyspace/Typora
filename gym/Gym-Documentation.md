@@ -14,7 +14,7 @@ conda install -n myenv gym
 
 Gym 基本的构建块是 `Env` 类，这是一个模拟器，他可以模拟出一个环境，让你的智能体在里面进行训练，并且它是一个 `python` 类。Gym里面打包了很多的环境，比如 `MountainCar` 环境。
 
-![image-20220514211625350](D:\Program Files\Typora\image\image-20220514211625350.png)
+![image-20220514211625350](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205271310614.png)
 
 ```python
 import gym
@@ -105,7 +105,7 @@ import matplotlib.pyplot as plt
 plt.imshow(env_screen)
 ```
 
-![image-20220514222143331](D:\Program Files\Typora\image\image-20220514222143331.png)
+![image-20220514222143331](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205271310808.png)
 
 完整的代码如下：
 
