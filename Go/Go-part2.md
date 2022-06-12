@@ -1,6 +1,6 @@
 [TOC]
 
-# Go语言常量
+# Go**语言常量**
 
 常量是一个简单值的标识符，在程序运行时，不会被修改的量。
 
@@ -185,7 +185,7 @@ iota 表示从 0 开始自动加 1，所以 **i=1<<0**, **j=3<<1**（**<<** 表�
 
 
 
-# Go 语言运算符
+# Go **语言运算符**
 
 Go 语言内置的运算符有：
 
@@ -581,7 +581,7 @@ a + (b * c) / d 的值为  : 50
 
 
 
-# Go 语言条件语句
+# **Go 语言条件语句**
 
 > Go语言提供了以下几种条件判断语句
 
@@ -774,79 +774,643 @@ switch var1 {
 }
 ```
 
+变量 `var1` 可以是任何类型，而 `var1` 和 `var2` 则可以是同类型的任意值。类型不被局限于常量或整数，但必须是**相同的类型**；或者最终结果为相同类型的表达式。
+
+您可以同时测试多个可能符合条件的值，使用逗号分割他们，例如：case val1，val2，val3。
+
+流程图：
+
+![image-20220609233831040](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202206092338924.png)
+
+实例：
+
+```go
+package main
 
+import "fmt"
 
+func main(){
+    /* 定义局部变量*/
+    var grade string = "B"
+    var marks int = 90
+    
+    switch marks {
+        case 90: grade = "A"
+        case 80: grade = "B"
+        case 50,60,70: grade = "C"
+        default: grade = "D"
+    }
+    
+    switch {
+        case grade == "A":
+        	fmt.Printf("优秀！\n")
+        case grade == "B", grade == "C":
+        	fmt.Printf("良好！\n")
+    	case grade == "D": fmt.Printf("及格!\n")
+    	case grade == "F": fmt.Printf("不及格！\n")
+        default:
+        	fmt.Printf("差!\n")
+    }
+    
+    fmt.Printf("你的等级是 %s\n", grade)
+}
+```
+
+结果：
+
+```go
+优秀!
+你的等级是 A
+```
+
+
+
+### Type Switch
+
+switch 语句还可以被用于 type-switch 来判断某个 interface 变量中实际存储的变量类型。
+
+Type Switch语法格式：
+
+```go
+switch x.(type){
+    case type: statement(s)
+    case type: statement(s)
+    ....
+    default:
+    	statement(s)
+}
+```
+
+实例：
+
+```go
+package main
+
+import "fmt"
+
+func main(){
+    var x interface{}
+    
+    switch i := x.(type) {
+        case nil:
+        	fmt.Printf("x 的类型：%T", i)
+        case int:  
+        	fmt.Printf("x 是 int 型")                     
+        case float64:
+            fmt.Printf("x 是 float64 型")          
+         case func(int) float64:
+            fmt.Printf("x 是 func(int) 型")               
+         case bool, string:
+            fmt.Printf("x 是 bool 或 string 型" )      
+         default:
+            fmt.Printf("未知型") 
+    }
+}
+```
+
+运行结果：
 
+```go
+x 的类型：<nil>
+```
 
 
 
+### fallthrough
 
+使用 `fallthrough` 会强制执行后面的case，而 fallthrough 不会去判断下一条 case 的表达式的结果是否为 true。
 
+实例：
 
+```go
+package main
 
+import "fmt"
 
+func main(){
+    switch {
+        case false:
+            fmt.Println("1、case 条件语句为 false")
+            fallthrough
+        case true:
+            fmt.Println("2、case 条件语句为 true")
+            fallthrough
+        case false:
+            fmt.Println("3、case 条件语句为 false")
+            fallthrough
+        case true:
+            fmt.Println("4、case 条件语句为 true")
+    	case false:
+            fmt.Println("5、case 条件语句为 false")
+            fallthrough
+    	default:
+            fmt.Println("6、默认 case")
+    }
+}
+```
 
+结果：
 
+```go
+2、case 条件语句为 true
+3、case 条件语句为 false
+4、case 条件语句为 true
+```
 
+从以上代码输出的结果可以看出：switch 从第一个判断表达式为 true 的 case 开始执行，如果 case 带有 fallthrough，程序会继续执行下一条 case，且它不会去判断下一个 case 的表达式是否为 true。
 
+### 总结
 
+1. 支持多条件匹配
+2. 不同的 case 之间不使用 break 分隔，默认只会执行一个 case。
+3.  如果想要执行多个 case，需要使用 fallthrough 关键字，也可用 break 终止。
 
+> ```go
+> switch{
+>     case 1:
+>     ...
+>     if(...){
+>         break
+>     }
+> 
+>     fallthrough // 此时switch(1)会执行case1和case2，但是如果满足if条件，则只执行case1
+> 
+>     case 2:
+>     ...
+>     case 3:
+> }
+> ```
 
+4. switch 的 default 与位置无关。
 
 
 
+## select 语句
 
+**select 是 Go 中的一个控制结构，类似于用于通信的 switch 语句。每个 case 必须是一个通信操作，要么是发送要么是接收。**
 
 
 
+**select 随机执行一个可运行的 case，如果没有 case 可运行，它将阻塞，直到有 case 可运行。一个default的子句应该总是可以运行的。**
 
 
 
+### 语法
 
+语法格式如下：
 
+```go
+select {
+    case communication clause: statement(s)
+    case communication clause: statement(s)
+    ...
+    default: /* 可选 */
+    statement(s)
+}
+```
 
+关于 select 的描述：
 
+- 每个 case 都必须是一个通信
 
+- 所有的 channel 表达式都会被求值
 
+- 所有被发送的表达式都会被求值
 
+- 如果任意某个通信可以进行，它就执行，其他的被忽略。
 
+- 如果有多个 case 都可以运行，select 会随机公平地选出一个执行，其他的不会执行。
 
+  - 否则：
 
+    - 1、如果有default子句，则执行该子句。
+    - 2、如果没有default子句，select将被阻塞，直到某个通信可以运行，Go不会重新对channel或值进行求值。
 
+    
 
+实例：
 
+```go
+package main
 
+import "fmt"
 
+func main(){
+    var c1, c2, c3 chan int
+    var i1, i2 int
+    select {
+        case i1 = <-c1:
+        	fmt.Printf("received ", i1, " from c1\n")
+        case c2 <- i2:
+        	fmt.Println("sent ", i2, " to c2\n")
+        case i3, ok := (<-c3): // same as: i3, ok := <-c3
+        	if ok {
+            	fmt.Printf("received ", i3, " from c3\n")
+         	} else {
+            	fmt.Printf("c3 is closed\n")
+         	}
+      	default:
+         	fmt.Printf("no communication\n")
+    }
+}
+```
 
+以上代码的执行结果：
 
+> ```go
+> no communication
+> ```
 
 
 
+**笔记**：
 
+> select 是随机执行的不是循环检测，是为了避免饥饿问题
 
+```go
+package mian
 
+import (
+    "fmt"
+    "time"
+)
 
+func Chann(ch chan int, stopCh chan bool){
+    for j:=0; j<10; j++ {
+        ch <- j
+        time.Sleep(time.Second)
+    }
+    stopCh <- true;
+}
 
+func main(){
+    ch := make(chan int)
+    c := 0
+    stopCh := make(chan int)
+    
+    go Chann(ch, stopCh)
+    
+    for {
+        select {
+            case c = <- ch:
+            fmt.Println("Receive C", c)
+            case s := <- ch:
+            fmt.Prontln("Receive S", s)
+            case _ = <-stopCh:
+            goto end
+        }
+    }
+    end:
+}
+```
 
 
 
 
 
+# Go 语言循环语句
 
+## 循环类型
 
+| 循环类型                                                   | 描述                                 |
+| :--------------------------------------------------------- | :----------------------------------- |
+| [for 循环](https://www.runoob.com/go/go-for-loop.html)     | 重复执行语句块                       |
+| [循环嵌套](https://www.runoob.com/go/go-nested-loops.html) | 在 for 循环中嵌套一个或多个 for 循环 |
 
+### for循环
 
+> 语法
 
+Go 语言的 For 循环有 3 种形式，只有其中的一种使用分号。
 
+和 C 语言的 for 一样：
 
+```go
+for init; condition; post { }
+```
 
+和 C 的 while 一样：
 
+```go
+for condition { }
+```
 
+和 C 的 for(;;) 一样：
 
+```go
+for { }
+```
 
+- init： 一般为赋值表达式，给控制变量赋初值；
+- condition： 关系表达式或逻辑表达式，循环控制条件；
+- post： 一般为赋值表达式，给控制变量增量或减量。
 
 
 
+for语句执行过程如下：
+
+- 1、先对表达式 1 赋初值；
+- 2、判别赋值表达式 init 是否满足给定条件，若其值为真，满足循环条件，则执行循环体内语句，然后执行 post，进入第二次循环，再判别 condition；否则判断 condition 的值为假，不满足条件，就终止for循环，执行循环体外语句。
+
+for 循环的 range 格式可以对 slice、map、数组、字符串等进行迭代循环。
+
+range 之后得到的第一个值为键key或者索引index，第二个值为值value。格式如下：
+
+```go
+for key, value := range oldMap {
+    newMap[key] = value
+}
+```
+
+以上代码中的 key 和 value 是可以省略。
+
+如果只想读取 key，格式如下：
+
+```go
+for key := range oldMap
+```
+
+或者这样：
+
+```go
+for key, _ := range oldMap
+```
+
+如果只想读取 value，格式如下：
+
+```go
+for _, value := range oldMap
+```
+
+只有这一种方式，如果使用 `for value := range oldMap` 的话，输出的是Go语言语法的类型值(例如：`%!f(int=2)`)。
+
+
+
+实例：
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+        sum := 0
+        for i := 0; i <= 10; i++ {
+                sum += i
+        }
+        fmt.Println(sum)
+}
+```
+
+结果：
+
+```go
+55
+```
+
+init 和 post 参数是可选的，我们可以直接省略它，类似 While 语句。
+
+以下实例在 sum 小于 10 的时候计算 sum 自相加后的值：
+
+实例：
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+        sum := 1
+        for ; sum <= 10; {
+                sum += sum
+        }
+        fmt.Println(sum)
+
+        // 这样写也可以，更像 While 语句形式
+        for sum <= 10{
+                sum += sum
+        }
+        fmt.Println(sum)
+}
+```
+
+输出结果：
+
+```go
+16
+16
+```
+
+无限循环：
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+        sum := 0
+        for {
+            sum++ // 无限循环下去
+        }
+        fmt.Println(sum) // 无法输出
+}
+```
+
+要停止无限循环，可以在命令窗口按下**ctrl-c** 。
+
+**For-each range 循环**
+
+这种格式的循环可以对字符串、数组、切片等进行迭代输出元素。
+
+range 之后得到的第一个值为键key或者索引index，第二个值为值value。
+
+```go
+package main
+import "fmt"
+
+func main() {
+        strings := []string{"google", "runoob"}
+        for i, s := range strings {
+                fmt.Println(i, s)
+        }
+
+
+        numbers := [6]int{1, 2, 3, 5}
+        for i,x:= range numbers {
+                fmt.Printf("第 %d 位 x 的值 = %d\n", i,x)
+        }  
+}
+```
+
+运行结果：
+
+```go
+0 google
+1 runoob
+第 0 位 x 的值 = 1
+第 1 位 x 的值 = 2
+第 2 位 x 的值 = 3
+第 3 位 x 的值 = 5
+第 4 位 x 的值 = 0
+第 5 位 x 的值 = 0
+```
+
+for 循环的 range 格式可以省略 key 和 value，如下实例：
+
+```go
+package main
+
+import "fmt"
+
+func main(){
+    map1 :=  make(map[int]float32)
+    map1[1] = 1.0
+    map1[2] = 2.0
+    map1[3] = 3.0
+    map1[4] = 4.0
+    
+    // 读取 key 和 value
+    // 变量名称不固定，可以替换为其他的变量名
+    // 只是第一个位置为键名，第二个位置为值名
+    for key, value := range map1 {
+        fmt.Printf("key is: %d - value is: %f\n", key, value)
+    }
+    
+    // 读取 key 
+    for key := range map1{
+        fmt.Printf("key is: %d\n", key)
+    }
+    
+    // 读取 value
+    // 只有这一个方式，若是采用 value := range map1
+    // 则会输出：%!f(int=2)
+    for _, value := range map1 {
+        fmt.Printf("value is: %f\n", value)
+    }
+    
+}
+```
+
+以上运算输出结果：
+
+```go
+key is: 4 - value is: 4.000000
+key is: 1 - value is: 1.000000
+key is: 2 - value is: 2.000000
+key is: 3 - value is: 3.000000
+key is: 1
+key is: 2
+key is: 3
+key is: 4
+value is: 1.000000
+value is: 2.000000
+value is: 3.000000
+value is: 4.000000
+```
+
+
+
+### Go语言循环嵌套
+
+> 语法格式
+
+```go
+for [condition | (init; condition; increment) | Range]{
+    for [condition | (init; condition; increment) | Range]{
+        statement(s)
+    }
+    statement(s)
+}
+```
+
+实例：
+
+```go
+package main
+
+import "fmt"
+
+func main(){
+    /* 定义局部变量 */
+    var i, j int
+    
+    for i=2; i<100; i++ {
+        for j=2; j<=(i/j)l j++ {
+            if(i%j==0) {
+                break; // 如果发现因子，则不是素数。
+            }
+        }
+        if(j > (i/j)) {
+            fmt.Printf("%d 是素数\n", i)
+        }
+    }
+}
+```
+
+结果：
+
+```go
+2  是素数
+3  是素数
+5  是素数
+7  是素数
+11  是素数
+13  是素数
+17  是素数
+19  是素数
+23  是素数
+29  是素数
+31  是素数
+37  是素数
+41  是素数
+43  是素数
+47  是素数
+53  是素数
+59  是素数
+61  是素数
+67  是素数
+71  是素数
+73  是素数
+79  是素数
+83  是素数
+89  是素数
+97  是素数
+```
+
+> 九九乘法表
+
+```go
+package main 
+
+import "fmt"
+
+func main() {
+    for m := 1; m < 10; m++ {
+    /*    fmt.Printf("第%d次：\n",m) */
+        for n := 1; n <= m; n++ {
+            fmt.Printf("%dx%d=%d ",n,m,m*n)
+        }
+        fmt.Println("")
+    }
+}
+```
+
+
+
+
+
+## 循环控制语句
+
+循环控制语句可以控制循环体内语句的执行过程。
+
+GO 语言支持以下几种循环控制语句：
+
+| 控制语句                                                     | 描述                                                |
+| :----------------------------------------------------------- | :-------------------------------------------------- |
+| [break 语句](https://www.runoob.com/go/go-break-statement.html) | 经常用于中断**当前 for 循环**或**跳出 switch 语句** |
+| [continue 语句](https://www.runoob.com/go/go-continue-statement.html) | 跳过当前循环的剩余语句，然后继续进行下一轮循环。    |
+| [goto 语句](https://www.runoob.com/go/go-goto-statement.html) | 将控制转移到被标记的语句。                          |
 
 
 
