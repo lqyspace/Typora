@@ -22,7 +22,11 @@ ipython kernel install --user --name=my-conda-env-kernel
 jupyter notebook
 ```
 
+或者
 
+```
+conda install -n my-conda-env nb_conda
+```
 
 然后就可以直接在 jupyter 里选择虚拟环境了
 
