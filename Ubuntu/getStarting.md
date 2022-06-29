@@ -384,3 +384,18 @@ date
 3.如果不成功就把启动时连接去掉再试试
 
 ![image-20220526010716190](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205260107307.png)
+
+
+
+## Ubuntu如何查看磁盘空间
+
+```go
+df -hl
+```
+
+查看说明文档：
+
+```go
+df --help
+```
+
