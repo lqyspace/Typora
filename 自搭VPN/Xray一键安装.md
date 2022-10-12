@@ -49,3 +49,9 @@ reboot
 再跑一次脚本，输入3，1，复制记录下输出信息:
 
 ![](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205261129146.png)
+
+
+
+# 相关教程
+
+## [X-ui，支持多协议多用户的 Xray 面板！V2-ui全面停止更新，后续逐渐用 X-ui 面板取代 V2-ui 面板！](https://www.v2rayssr.com/x-ui.html)
