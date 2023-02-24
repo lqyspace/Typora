@@ -18,7 +18,7 @@ conda install -n my-conda-env ipykernel
 ```
 
 ```python
-ipython kernel install --user --name=my-conda-env-kernel
+python -m ipython kernel install --user --name=my-conda-env-kernel
 jupyter notebook
 ```
 
