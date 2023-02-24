@@ -1244,3 +1244,408 @@ public class HumanDemo {
 
 
 
+### 17.2 成员内部类的理解
+
+- 成员内部类的定义位置
+
+  - 在类中方法，跟成员变量是一个位置
+
+- 外界创建成员内部类格式
+
+  - 格式：外部类名.内部类名 对象名 = 外部类对象.内部类对象；
+  - 举例：Outer.Inner oi = new Outer().new Inner();
+
+- **成员内部类的推荐使用方法**
+
+  - 将一个类设计为一个内部类的目的，大多数是不想让外界去访问，所以内部类的定义应该私有化。私有化之后，再提供一个可以让外界调用的方法，方法内部创建内部类对象并调用。
+
+- 示例代码：
+
+  ```java
+  class Outer{
+      private int num = 10;
+      private class Inner{
+          public void show(){
+              System.out.println(num);
+          }
+      }
+      public void method(){
+          Inner in = new Inner();
+          in.show();
+      }
+  }
+  
+  public class InnerDemo{
+      public static void main(String[] args){
+          // Outer.Inner oi = new Outer().new Inner();
+          // oi,show();
+          Outer o = new Outer();
+          o.method();
+      }
+  }
+  ```
+
+  
+
+### 17.3 局部内部类的理解
+
+- 局部内部类定义的位置
+  - 局部内部类是在方法中定义的类
+- 局部内部类方法方式
+  - 局部内部类，外界是无法使用的，需要在方法内部创建对象并使用
+  - 该类可以直接访问外部类的成员，也可以访问方法内的局部变量
+- 示例代码：
+
+```java
+class Outer {
+    private int num = 10;
+    public void method(){
+        int num2 = 20;
+        class Inner {
+            public void show(){
+                System.out.println(num);
+                Symtem.out.println(num2);
+            }
+        }
+        Inner i = new Inner();
+        i.show();
+    }
+}
+
+public class OuterDemo{
+    public static void main(String[] args){
+        Outer o = new Outer();
+        o.method();
+    }
+}
+```
+
+
+
+### 17.4 匿名内部类
+
+- 匿名内部类的前提
+
+  - 存在一个类或者一个接口，这里的类可以是具体的类或者是抽象类
+
+- 匿名内部类的格式
+
+  - 格式：new 类名(){重写方法}  new 接口名(){重写方法}
+
+  - 举例
+
+    ```java
+    new Inter(){
+    	@Override
+        public void method(){}
+    }
+    ```
+
+- 匿名内部类的本质
+
+  - 本质：是一个继承了该类或者实现了该接口的子类匿名对象
+
+- 匿名内部类的细节
+
+  - 匿名内部类可以通过多态的形式接受
+
+    ```java
+    Inert i = new Inter(){
+        @Override
+        public void method(){
+            
+        }
+    }
+    ```
+
+  - 匿名内部类直接调用方法
+
+    ```java
+    interface Inter{
+        void method();
+    }
+    
+    class Test{
+        public static void main(String[] args){
+            new Inter(){
+                @Override
+                public void method(){
+                    System.out.println("我是匿名内部类");
+                }
+            }.method();// 直接调用方法
+        }
+    }
+    ```
+
+
+
+### 17.5 匿名内部类在开发中的使用
+
+- 匿名内部类在开发中的使用
+
+  - 当发现某个方法需要  接口或抽象类的子类对象，我们就可以传递一个匿名内部类过去，来简化传统的代码
+
+- 示例代码：
+
+  ```java
+  interface Jumpping{
+  	void jump();
+  }
+  
+  class Cat implements Jumpping{
+      @Override
+      public void jump(){
+          System.out.println("猫可以跳高");
+      }
+  }
+  
+  class Dog implements Jumpping{
+      @Override
+      public void jump(){
+          System.out.println("狗可以跳高");
+      }
+  }
+  
+  class JumppingOperator{
+      public void method(Jumpping j){
+          j.jump();
+      }
+  }
+  
+  class JumppingDemo{
+      public static void main(String[] args){
+          JumppingOperator jo = new JumppingOperator();
+          Jumpping cat = new Cat();
+          jo.method(cat);
+          
+          Jumpping dog = new Dog();
+          jo.method(dog);
+          
+          // 匿名内部类
+          jo.method(
+          	new Jumpping(){
+                  @Override
+                  public void jump(){
+                      System.out.println("猫可以跳高");
+                  }
+              }
+          );
+          
+          jo.method(
+          	new Jumpping(){
+                  @Override
+                  public void jump(){
+                      System.out.println("狗可以跳高");
+                  }
+              }
+          );
+      }
+  }
+  ```
+
+  
+
+## 18 常用API
+
+### 18.1 Math
+
+![image-20230222140352523](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302221403651.png)
+
+
+
+### 18.2 System
+
+![image-20230222140539082](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302221405134.png)
+
+![image-20230222140549628](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302221405687.png)
+
+
+
+### 18.3 Object类的toString方法
+
+![image-20230222140807526](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302221408583.png)
+
+```java
+package com.javase01.innerclass01;
+
+public class Student {
+    private String name;
+    private int age;
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public Student() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+}
+
+```
+
+```java
+package com.javase01.innerclass01;
+
+public class ObjectDemo {
+    public static void main(String[] args) {
+        Student stu = new Student();
+
+        stu.setAge(32);
+        stu.setName("林青霞");
+        System.out.println(stu.toString());
+        System.out.println(stu);
+    }
+}
+```
+
+运行结果：
+
+```java
+Student{name='林青霞', age=32}
+Student{name='林青霞', age=32}
+```
+
+
+
+### 18.4 Object类的equals方法
+
+![image-20230222141342417](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302221413475.png)
+
+```java
+package com.javase01.innerclass01;
+
+public class Student {
+    private String name;
+    private int age;
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public Student() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+
+
+
+    @Override
+    public boolean equals(Object o) {
+        /*
+        * this --- stu
+        * o    --- stu1
+        * */
+        // 比较地址是否相同，如果相同，直接返回true
+        if (this == o) return true;
+
+        //判断参数是否为null
+        //判断两个对象是否来自同一个类
+        if (o == null || getClass() != o.getClass()) return false;
+
+        // 向下转型
+        Student student = (Student) o;
+
+        // 比较年龄是否相同，不带this，表示age代表本实例的age
+        if (age != student.age) return false;
+        // 比较name的内容是否相同，name是String类型，String的equals方法是比较两个字符串的内容是否相同，区分大小写
+        return name != null ? name.equals(student.name) : student.name == null;
+    }
+}
+```
+
+```java
+package com.javase01.innerclass01;
+
+public class ObjectDemo {
+    public static void main(String[] args) {
+        Student stu = new Student();
+
+        stu.setAge(32);
+        stu.setName("林青霞");
+        System.out.println(stu.toString());
+        System.out.println(stu);
+
+        Student stu1 = new Student("林青霞", 32);
+
+        // 需求，比较两个对象的内容是否相同
+//        System.out.println(stu==stu1); // false
+
+//        System.out.println(stu.equals(stu1)); // false
+        /*
+        * equals()源码：
+        *   public boolean equals(Object obj) {
+        *       // this --- stu
+        *       // obj --- stu1
+        *       // 所以返回false
+                return (this == obj);
+            }
+            * 所以重写equals()
+        * */
+        System.out.println(stu.equals(stu1));
+
+        System.out.println(stu.getClass());// class com.javase01.innerclass01.Student
+        System.out.println(stu1.getClass()); // class com.javase01.innerclass01.Student
+
+
+    }
+}
+```
+
+
+
+### 18.5 Arrays应用
+
+![image-20230222180831874](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302221808943.png)
+
+- 像Math、Arrays、System统称为工具类
+- 它们的构造方法用private修饰，是为了避免外界创建对象
+- 成员用public static 修饰是为了让他们的方法能够直接通过类名调用。
+
+总结：在帮助文档中，并没有给出Math、System、Arrays的构造方法，其实并不是他们没有构造方法，而是在源码里默认把他们的构造方法私有化，因此不能被外界继承。但是，他们类中的方法都使用了静态修饰符，可以直接通过类名调用，这是他们的设计特点。
