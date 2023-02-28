@@ -629,3 +629,104 @@ public class Throwable{
 * */
 ```
 
+
+
+## 3.5 编译时异常和运行时异常的区别
+
+- 编译时异常
+  - 都是Exception类及其子类
+  - 必须是显示处理，否则程序就会发生错误，无法通过编译
+- 运行时异常
+  - 都是RubtimeException类及其子类
+  - 无需显示处理，也可以和编译时异常一起处理
+
+
+
+## 3.6 throws方式处理异常
+
+- 定义格式
+
+  ```java
+  public void 方法() throws 异常类名{
+      
+  }
+  ```
+
+- 示例代码
+
+  ```java
+  public static void main(String[] args){
+      method();
+  }
+  // 编译时异常
+  public static void method2() throws ParseException{
+      try{
+          String s = "2022-12-10";
+          SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+          Date d = sdf.parse(s);
+          System.out.println(d);
+      }catch (ParseException e){
+          e.printStackTrace();
+      }
+  }
+  
+  // 运行时异常
+  public static void method(){
+      try{
+          int[] arr = {1,2,3};
+          System.out.println(arr[3]);
+      }
+  }
+  ```
+
+- 注意事项
+
+  - 这个throws格式是跟在方法的括号后面的
+  - 编译时异常必须处理，两种处理方法：try ... catch... ，或者throws，如果 采用throws这种方案，将来谁调用谁处理
+  - 运行时异常可以不处理，出现问题，需要我们回来修改代码。
+
+
+
+## 3.7 throws和throw的区别
+
+- throws
+  - 用在方法声明后面，跟的是异常类名
+  - 表示抛出异常，由该方法的调用者处理
+  - 表示出现异常的一种可能，并不一定会发生这些异常
+- throw
+  - 用在方法体内，跟的是异常对象名
+  - 由表示抛出异常，有方法体内的语句处理
+  - 执行throw一定抛出了某种异常
+
+
+
+```java
+public class ExceptionDemo {
+    public static void main(String[] args) {
+        System.out.println("开始");
+        method();
+        System.out.println("结束");
+    }
+
+    public static void method() throws ArrayIndexOutOfBoundsException {
+        int[] arr = {1,2,3};
+        System.out.println(arr[3]);
+    }
+}
+```
+
+输出：
+
+```java
+开始
+Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 3
+	at ExceptionDemo.method(ExceptionDemo.java:10)
+	at ExceptionDemo.main(ExceptionDemo.java:4)
+```
+
+注意：虽然method函数抛出了异常，但是，在main方法的调用中，仍然没有使用try catch进行处理，所以依然会报错，不会执行后面的语句
+
+
+
+## 3.8 自定义异常
+
