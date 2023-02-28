@@ -724,9 +724,240 @@ Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 3
 	at ExceptionDemo.main(ExceptionDemo.java:4)
 ```
 
-注意：虽然method函数抛出了异常，但是，在main方法的调用中，仍然没有使用try catch进行处理，所以依然会报错，不会执行后面的语句
+注意：
+
+- 运行时异常
+
+虽然method函数抛出了异常，但是，并没有真正的处理异常，所以在main方法的调用中，必须使用try catch进行处理，要不然依然会报错，不会执行后面的语句。
+
+
+
+- 编译时异常
+
+使用throws语句抛出了异常，那么抛出异常的这个方法的调用者在调用时必须处理这个异常，否则依然会报错。
 
 
 
 ## 3.8 自定义异常
+
+- 格式
+
+  ```java
+  public class 类名 extends Exception {
+      无参构造
+      带参构造
+  }
+  ```
+
+实例代码：
+
+- 老师类
+
+  ```java
+  public class Teacher{
+      public void checkScore(int score) throws ScoreException{
+          if(score<0 || score>100){
+              // throw new ScoreException();
+              throw new ScoreException("你给的分数有误，不在0-100之间。");
+          }else{
+              System.out.println("成绩正常。");
+          }
+      }
+  }
+  ```
+
+- 测试类
+
+  ```java
+  public class TeacherTest {
+      public static void main(String[] args) {
+          Scanner sc = new Scanner(System.in);
+          System.out.println("请输入分数：");
+          int score = sc.nextInt();
+  
+          Teacher t = new Teacher();
+          try {
+              t.checkScore(score);
+          } catch (ScoreException e) {
+              e.printStackTrace();
+          }
+          System.out.println("结束");
+      }
+  }
+  ```
+
+  ```java
+  120
+  com.exception.ScoreException: 你给的分数非法，请输入0-100之间。
+  	at com.exception.Teacher.checkScore(Teacher.java:8)
+  	at com.exception.TeacherTest.main(TeacherTest.java:13)
+  结束
+  ```
+
+
+
+# 四、集合
+
+## 1.1 Collection
+
+### 1.1.1 集合类的特点
+
+- 提供一种存储空间可变的存储模型，存储的数据容量可以随时发生改变。
+
+### 1.1.2 集合类的体系图
+
+![image-20230228180247651](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302281802759.png)
+
+### 1.1.3 Collection集合概述和使用
+
+Collection集合概述
+
+- 是单列集合的顶层接口。它表示一组对象，这些对象也称为Collection的元素
+- JDK不提供此接口的任何直接实现，它提供更具体的子接口（如Set和List）实现
+
+
+
+创建Collection集合对象
+
+- 多态的方式
+
+- 具体的实现类ArrayList
+
+
+
+Collection 集合的基本使用
+
+```java
+public class CollectionDemo01 {
+    public static void main(String[] args) {
+        Collection<String> c = new ArrayList<String>();
+
+        c.add("hello");
+        c.add("world");
+        c.add("java");
+
+        System.out.println(c);
+        // ArrayList方法：直接输出一个对象名，输出的不是地址，而是具体的元素，说明ArrayList重写了toString的方法
+    }
+}
+```
+
+
+
+### 1.1.4 Collection集合的常用方法
+
+![image-20230228193950399](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302281939468.png)
+
+
+
+**tips：在 idea的工具栏中：视图---->工具窗口---->结构，可以查看一个类的各个函数结构，和类的所有信息（快捷键：Alt+7）**
+
+```java
+public class CollectionDemo02 {
+    public static void main(String[] args) {
+        // 创建集合对象
+        Collection<String> c = new ArrayList<String>();
+
+        // boolean add(E e)：调用add方法，永远返回的是 true
+        System.out.println(c.add("hello"));
+        System.out.println(c.add("world"));
+        System.out.println(c.add("world"));
+
+        // boolean remove(Object o)：从集合中移除指定的元素
+        // 有则返回true，无则返回false
+//        System.out.println(c.remove("hello"));
+//        System.out.println(c.remove("jaaaa"));
+
+
+//        void clear()：清空集合的元素
+//        c.clear();
+
+        // boolean contains（Object o）：判断集合中是否存在指定元素
+        System.out.println(c.contains("hello1"));
+
+        // boolean isEmpty(Object o)：判断集合是否为空
+        System.out.println(c.isEmpty());
+
+        // int size():返回集合的大小
+        System.out.println(c.size());
+        System.out.println(c);
+    }
+}
+```
+
+```java
+true
+true
+true
+false
+false
+3
+[hello, world, world]
+```
+
+
+
+注意：ctrl+Alt+V可以快速实例化：比如输入c.iterator(),然后按ctrl+Alt+V，可以快速实例化。
+
+### 1.1.5 Collection集合的遍历
+
+![image-20230228201351833](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302282013886.png)
+
+- 代码示例
+
+  ```java
+  public class CollectionDemo03 {
+      public static void main(String[] args) {
+          Collection<String> c = new ArrayList<>();
+  
+          c.add("hello");
+          c.add("world");
+          c.add("java");
+  
+          // Iterator<E> iterator():返回此集合中元素的迭代器，通过集合的iterator()方法得到
+          Iterator<String> iterator = c.iterator();
+          /*
+          * public Iterator<E> iterator(){
+          *   return new Itr();
+          * }
+          *
+          * private class Itr implements Iterator<E>{
+          *   ... ...
+          * }
+          * */
+  
+  //        System.out.println(iterator.next());
+  //        System.out.println(iterator.next());
+  //        System.out.println(iterator.next());
+  //        System.out.println(iterator.next()); // NoSuchElementException：表示被请求的元素不存在，运行时异常
+  //        System.out.println(c.size());
+  
+          // noolean hasNext(): 如果迭代具有更多的元素，则返回true
+          while (iterator.hasNext()){
+              System.out.println(iterator.next());
+              String s = iterator.next();
+              System.out.println(s);
+          }
+  
+      }
+  }
+  ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
