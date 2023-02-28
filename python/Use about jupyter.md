@@ -26,6 +26,8 @@ jupyter notebook
 
 ```
 conda install -n my-conda-env nb_conda
+conda install -n my-conda-env jupyter_contrib_nbextensions
+conda install -n my-conda-env packaging
 ```
 
 然后就可以直接在 jupyter 里选择虚拟环境了
@@ -56,3 +58,11 @@ python -m pip install jupyter_nbextensions_configurator
 ```
 
 （3）重新打开在Jupyter Notebook即可
+
+
+
+# 调用远程jupyter
+
+推荐博客：
+
+[https://blog.csdn.net/qq_18256855/article/details/125439096](https://blog.csdn.net/qq_18256855/article/details/125439096)
