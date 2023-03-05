@@ -250,13 +250,13 @@ s.age = 100;//正确
 
     编译看父类，运行看子类
 
-**解释：**在编译的时候主要看父类，对于成员变量而言，运行的时候也主要看父类，而对于成员方法而言，运行的时候看子类，因为子类的成员方法有重新，而成员变量没有。
+**解释：**在编译的时候主要看父类，对于成员变量而言，运行的时候也主要看父类，而对于成员方法而言，运行的时候看子类，因为子类的成员方法有重写，而成员变量没有。
 
 **代码示例：**
 
 Animal类：
 
-```
+```java
 public class Animal {
     public int age = 40;
     public void eat(){
@@ -267,7 +267,7 @@ public class Animal {
 
 Cat类：
 
-```
+```java
 public class Cat extends Animal{
     public int age = 20;
 
@@ -294,15 +294,26 @@ public class AnimalDemo {
         Animal a = new Cat();
 
         System.out.println(a.age);
-//        System.out.println(a.weight); // 不能直接调用
+//        System.out.println(a.weight); // 不能直接调用，因为父类中没有这个成员变量
 
         a.eat();
-//        a.playGame();  // 不能直接调用
+//        a.playGame();  // 不能直接调用，因为父类中没有该方法
     }
 }
 ```
 
+输出：
 
+```java
+40
+猫吃鱼
+```
+
+总结：
+
+- 通过输出可以看出，成员变量是从父类那里继承过来的，而成员方法被子类重写
+- 对于成员变量：编译看父类、运行看父类
+- 对于成员方法：编译看父类，运行看子类；**编译看父类**是指 子类调用的成员方法在父类里面必须也存在，如果子类调用的成员方法在父类中不存在，那么子类便不能调用这个成员方案；**运行看子类**是指 如果子类调用的成员方法在父类中存在，那么子类就可以调用这个成员方法，子类调用的这个成员方法主要看运行子类重写之后的方法。
 
 
 
@@ -384,8 +395,32 @@ public class AnimalDemo {
 
         Dog d = new Dog();
         animalOperator.useAnimal(d);
+        
+        // 多态
+        // 向上转型
+        Animal a = new Cat();
+        a.eat();
+//        a.playGame(); // 不能调用子类特有成员
+
+        // 创建Cat类对象
+//        Cat c = new Cat();
+//        c.eat();
+//        c.playGame();
+
+        // 向下转型
+        Cat c = (Cat) a;
+        c.eat();
+        c.playGame();
     }
 }
+```
+
+输出：
+
+```java
+猫吃鱼
+猫吃鱼
+猫捉迷藏
 ```
 
 
@@ -559,6 +594,18 @@ public class AnimalDemo {
 }
 ```
 
+输出：
+
+```java
+猫爱吃鱼
+40
+北京
+```
+
+总结：
+
+- 子类需要重写抽象类的所有抽象方法，要么子类也是抽象类
+
 
 
 **案例演示：**
@@ -644,6 +691,15 @@ public class AnimalDemo {
         a.eat();
     }
 }
+```
+
+输出：
+
+```java
+加菲
+猫爱吃鱼
+加菲
+猫爱吃鱼
 ```
 
 
@@ -1318,6 +1374,13 @@ public class OuterDemo{
         o.method();
     }
 }
+```
+
+输出：
+
+```java
+10
+20
 ```
 
 
