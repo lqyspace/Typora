@@ -223,3 +223,18 @@ git branch -dr [remote/branch]
 ```
 
 ![视频格式](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202205192341412.png)
+
+## Git设置代理
+> 设置全局代理
+
+git config --global http.proxy http://127.0.0.1:1080
+git config --global https.proxy http://127.0.0.1:1080
+
+> 去取代理设置
+
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+
+> 设置临时代理
+
+git clone -c http.proxy="127.0.0.1:1081" https://github.com/jonny-xhl/FastReport.git
