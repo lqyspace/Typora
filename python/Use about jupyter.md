@@ -66,3 +66,9 @@ python -m pip install jupyter_nbextensions_configurator
 推荐博客：
 
 [https://blog.csdn.net/qq_18256855/article/details/125439096](https://blog.csdn.net/qq_18256855/article/details/125439096)
+
+
+# 添加pip的清华镜像
+
+参考博客：https://blog.csdn.net/Blackrosetian/article/details/127037267
+[https://blog.csdn.net/Blackrosetian/article/details/127037267](https://blog.csdn.net/Blackrosetian/article/details/127037267)
