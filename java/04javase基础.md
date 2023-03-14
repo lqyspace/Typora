@@ -467,6 +467,7 @@ public class ArrayList<E> extends AbstractList<E>
 
   - 同一个对象多次调用hashCode()方法返回的哈希值是相同的
   - 默认情况下，不同对象的哈希值是不同的。而重写hashCode()方法，可以实现让不同的对象的哈希值相同
+  - 当重写hashCode和equals方法时，自动生成即可。
 
 - 获取哈希值的代码
 
@@ -541,7 +542,89 @@ public class ArrayList<E> extends AbstractList<E>
   }
   ```
 
+  示例：保证学生对象的唯一性：
   
+  学生类：
+  
+  ```java
+  package myset.setutil.bean;
+  
+  public class Student {
+      private String name;
+      private int age;
+  
+      public Student(String name, int age) {
+          this.name = name;
+          this.age = age;
+      }
+  
+      public Student() {
+      }
+  
+      public String getName() {
+          return name;
+      }
+  
+      public void setName(String name) {
+          this.name = name;
+      }
+  
+      public int getAge() {
+          return age;
+      }
+  
+      public void setAge(int age) {
+          this.age = age;
+      }
+  
+      @Override
+      public boolean equals(Object o) {
+          if (this == o) return true;
+          if (o == null || getClass() != o.getClass()) return false;
+  
+          Student student = (Student) o;
+  
+          if (age != student.age) return false;
+          return name != null ? name.equals(student.name) : student.name == null;
+      }
+  
+      @Override
+      public int hashCode() {
+          int result = name != null ? name.hashCode() : 0;
+          result = 31 * result + age;
+          return result;
+      }
+  }
+  
+  ```
+  
+  测试类：
+  
+  ```java
+  public class HashSetDemo {
+      public static void main(String[] args) {
+          HashSet<Student> hs = new HashSet<Student>();
+  
+          // 创建学生类
+          Student s1 = new Student("料情绪",33);
+          Student s2 = new Student("张曼玉",33);
+          Student s3 = new Student("王祖贤",32);
+  
+          Student s4 = new Student("王祖贤",32);
+  
+          hs.add(s1);
+          hs.add(s2);
+          hs.add(s3);
+          hs.add(s4);
+  
+          for (Student s: hs){
+              System.out.println(s.getName() + ":" + s.getAge());
+          }
+      }
+  }
+  ```
+  
+  注意：由于重写了hashCode方法，因此可以实现让不同的对象返回相同的哈希值。
 
 ## 3 HashSet集合概述和特点
 
@@ -600,7 +683,7 @@ public class SetDemo {
 ![image-20230305135732729](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303051357782.png)
 
 - HashSet集合存储元素
-  - 要保证元素的唯一性，需要重写hashCode()和equal()方法
+  - 要保证元素的唯一性，需要重写hashCode()和equals()方法
 
 ```java
 Set<String> set = new HashSet<String>();
@@ -676,6 +759,869 @@ public class HashMap<K,V> extends AbstractMap<K,V> implements Map<K,V>{
             resize();
         afterNodeInsertion(evict);
         return null;
+    }
+}
+```
+
+
+
+### 3.4 常见数据结构之哈希表
+
+> **哈希表**
+
+- JDK8之前，底层采用 **数组+链表** 实现，可以是说一个 元素为链表的数组
+- JDK8之后，在长度比较长的时候，底层实现了优化
+
+![image-20230309235103032](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303092351133.png)
+
+说明：
+
+1.  计算6个字符串的哈希值
+2. HashSet的默认初始容量是16，所以声明一个长度16的数组
+3. 对这6个字符串取余，模为16
+4. 得到hello的存储位置为2，由于数组中并没有元素，所以可以直接将hello存入；然后存储world，发现还是2，位置上有元素，然后开始比较元素的哈希值，发现哈希值不一样，所以直接存入；再存入java，数组下标也是2，开始比较哈希值，哈希值不一样，如果哈希值一样的话，比较内容，内容不一样，直接存入。**存入的过程是以链表的形式进行存储。**
+5. 当再次存入world时，存储的位置是2，发现2上有值，比较哈希值，发现两者的哈希值也是一样的，然后比较内容，内容是一样的，则认为是一个元素，所以world将不再进行存入
+6. 当存入“重地”和“通话”的时候以此类推。
+
+
+
+## 4 LinkedHashSet集合概述和特点
+
+- LInkedHashSet集合的特点
+
+  - 它是由哈希表和链表实现的Set接口，具有可预测的迭代次序
+  - 由链表保证元素有序，也就是说元素的存储和去除的顺序是一致的
+  - 由哈希表保证元素唯一，也就是说没有重复的元素
+
+- LinkedHashSet集合的基本使用
+
+  ```java
+  public class LinkedHashSetDemo {
+      public static void main(String[] args) {
+          LinkedHashSet<String> lhs = new LinkedHashSet<>();
+  
+          lhs.add("heello");
+          lhs.add("world");
+          lhs.add("java");
+          lhs.add("world");
+          for (String s: lhs){
+              System.out.println(s);
+          }
+      }
+  }
+  // 存储和取出的顺序是一致的
+  ```
+
+输出：
+
+```java
+heello
+world
+java
+```
+
+
+
+## 5 Set集合的排序
+
+### 5.1 TreeSet集合概述和特点
+
+- TreeSet集合概述
+
+  - 元素有序，这里的顺序不是指存储和取出的顺序，而是按照一定的规则进行排序，具体的排序方式取决于构造方法
+    - TreeSet()：根据元素的自然排序进行排序
+    - TreeSet(Comparater comparater)：根据指定的比较器进行排序
+  - 没有带索引的方法，所以不能使用普通的for循环遍历；但是可以使用迭代器和增强for进行遍历。
+  - 由于是Set集合，所以不包含重复元素的集合
+
+- TreeSet集合的基本使用
+
+  ```java
+  public class TreeSetDemo {
+      public static void main(String[] args) {
+          TreeSet<Integer> ts = new TreeSet<>();
+          ts.add(10);
+          ts.add(40);
+          ts.add(30);
+          ts.add(50);
+          ts.add(20);
+          ts.add(30);
+  
+          for (Integer i:ts){
+              System.out.println(i);
+          }
+      }
+  }
+  ```
+
+  输出：
+
+  ```java
+  10
+  20
+  30
+  40
+  50
+  ```
+
+
+注：**默认排序的顺序是升序**
+
+### 5.2 自然排序Comparable的使用
+
+- 存储学生对象并遍历，创建TreeSet集合使用无参构造方法
+- 要求：按照年龄从小到大，年龄相同时，按照姓名的字母顺序排列
+
+- 实现步骤：
+  - 用TreeSet集合存储自定义对象，无参构造方法使用的是自然排序对元素进行排序
+  - 自然排序，就是让元素所属的类实现Comparable接口，并且需要重写CompareTo(T o)方法
+  - 重写方法时，一定要注意排序规则必须按照要求的主要条件和次要条件来写
+
+
+
+测试类：
+
+```java
+public class TreeSetDemo01 {
+    public static void main(String[] args) {
+        // 按照年龄从小到大排列，年龄相同时，按照姓名的字母表顺序
+        TreeSet<Student> ts = new TreeSet<>();
+        Student s1 = new Student("xihi", 23);
+        Student s2 = new Student("wangzhaojun", 24);
+        Student s3 = new Student("diaochan", 25);
+        Student s4 = new Student("yangyuhuan", 26);
+
+        Student s5 = new Student("libqingxia", 26);
+		Student s6 = new Student("libqingxia", 26);
+
+        // 把学生添加到集合
+        ts.add(s1);
+        ts.add(s2);
+        ts.add(s3);
+        ts.add(s4);
+        ts.add(s5);
+        ts.add(s6);// s6并未有添加进去，保证了学生的唯一性
+
+        for (Student s: ts){
+            System.out.println(s.getName() + ":"+ s.getAge());
+        }
+    }
+}
+```
+
+学生类：
+
+```java
+public class Student implements Comparable<Student>{
+    private String name;
+    private int age;
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public Student() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Student student = (Student) o;
+
+        if (age != student.age) return false;
+        return name != null ? name.equals(student.name) : student.name == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + age;
+        return result;
+    }
+
+
+    @Override
+    public int compareTo(Student s) {
+//        return 0; // 此时打印会输出一个元素，因为在添加第二个元素的时候，会和第一个元素进行比较，如果比较的结果是0，则认为是同一个元素
+//        所以没有添加成功
+//        return 1;// 此时比较的结果：第二个元素比第一个元素大，第三个元素比第二个元素大，后续元素比前的元素的大，为升序
+//        return -1; // 此时则认为：第二个元素比第一个元素小，第三个元素比第二个元素小，为降序
+//        int num = this.age - s.age; // this在前，为升序，this在后，为降序
+//        int num = this.age - s.age;
+
+//        总结：return 1 时为升序， return -1 时为降序
+//        而this在前的时候为升序，this在后的时候为降序，说明this在前时，是用大的值减小的值；this在后时，是用小的值减大的值
+        int num1 = this.age - s.age;
+        int num = num1==0? this.name.compareTo(s.name):num1;
+        return num;
+    }
+}
+```
+
+总结：
+
+- 将对象按照自定义的规则进行排序时，需要 **实现Comparable<Student> 接口** 同时重写 **compareTo**方法
+- return 0时，比较时则认为是同一个元素，所以在使用集合的add方法时，并不能有效添加。
+- return 1时为升序，则认为后添加的元素比先添加的元素大
+- return 0时为降序，则认为后添加的元素比先添加的元素小
+- this在前时为升序，this在后时为降序
+- String类也实现了 **Comparable<String>接口**，因此也可以使用 compareTo方法
+
+
+
+
+
+### 5.3 比较器排序Comparator的使用
+
+- 存储自定义对象并遍历，创建TreeSet集合并使用带参构造方法
+- 要求：按照年龄从小到大排序，年龄相同时，按照姓名的字母表顺序排列
+
+学生类：
+
+```java
+public class Student {
+    private String name;
+    private int age;
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public Student() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+```
+
+测试类：
+
+```java
+public class TreeSetDemo {
+    // 存储学生对象并遍历，创建TreeSet集合并使用带参构造方法
+//    要求：按照年龄从小到大排序，年龄相同时，按照姓名的字母表顺序排序
+    public static void main(String[] args) {
+        TreeSet<Student> ts = new TreeSet<>(new Comparator<Student>() {
+            @Override
+            public int compare(Student o1, Student o2) {
+                // this.age - s.age
+                // o1 - o2
+                int num = o1.getAge() - o2.getAge();
+                int num1 = num == 0? o1.getName().compareTo(o2.getName()) : num;
+                return num1;
+            }
+        });
+
+        Student s1 = new Student("xihi", 27);
+        Student s2 = new Student("wangzhaojun", 24);
+        Student s3 = new Student("diaochan", 21);
+        Student s4 = new Student("yangyuhuan", 26);
+
+        Student s5 = new Student("libqingxia", 26);
+        Student s6 = new Student("libqingxia", 26);
+
+        // 把学生添加到集合
+        ts.add(s1);
+        ts.add(s2);
+        ts.add(s3);
+        ts.add(s4);
+        ts.add(s5);
+        ts.add(s6);
+
+        for (Student s: ts){
+            System.out.println(s.getName() + ":" + s.getAge());
+        }
+    }
+}
+```
+
+总结：
+
+- 用TreeSet集合存储自定义对象时，带参构造方法使用的是 **比较器排序** 对元素进行排序
+- 比较器排序，就是让集合构造方法接收 **Comparator的实现类对象**，要重写 compare(T 01, T o2)方法
+- 重写方法时，一定要注意排序规则必须按照要求的**主要条件和次要条件**来写。
+
+
+
+案例：成绩排序案例
+
+![image-20230310103144647](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303101031786.png)
+
+![image-20230310103206867](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303101032926.png)
+
+![image-20230310103232559](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303101032637.png)
+
+![image-20230310103247841](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303101032891.png)
+
+### 5.4 案例：不重复的随机数
+
+需求：编写一个程序，获取10个1-20之间的随机数，需要随机数不能重复，并在控制台输出
+
+思路：
+
+- 创建Set集合对象
+
+- 创建随机数对象
+
+- 判断集合的长度是不是小于10
+
+  是：产生一个随机数，添加到集合
+
+  否：回到3继续
+
+- 遍历集合
+
+```java
+public class SetDemo01 {
+    public static void main(String[] args) {
+        // 创建Set集合对象
+//        Set<Integer> set = new HashSet<>();// 无序
+        Set<Integer> set = new TreeSet<>(); // 有序
+
+        // 创建随机数对象
+        Random r = new Random();
+
+        while (set.size()<10){
+            int number = r.nextInt(20) + 1;
+            set.add(number);
+        }
+
+        for (Integer i: set)
+            System.out.println(i);
+    }
+}
+```
+
+总结：
+
+- 用HashSet集合，最终的数据是不会排序的
+- 用TreeSet集合，最终的数据是可以排序的
+
+
+
+
+
+# 六、泛型
+
+## 1 泛型概述
+
+泛型：是JDK5中引入的特性，他提供了编译时类型安全检测机制，该机制允许在编译时检测到非法的类型；
+
+它的本质是 **参数化类型** 也就是说所操作的数据类型被指定为一个参数；
+
+提到参数，最熟悉的就是定义方法时有形参，然后调用此方法时传入实参；
+
+而参数化类型，就是 **将类型由原来的具体的类型参数化，然后在使用/调用时传入具体的类型**；
+
+这种参数类型可以用在类，方法和接口中，分别被称为**泛型类**，**泛型方法**，**泛型接口**。
+
+
+
+## 2 泛型定义格式
+
+- <类型>：指定一种类型的格式。这里的类型可以看成是形参。
+- <类型1，类型2...>：指定多种类型的格式，多种类型之间用逗号隔开。这里的类型可以看成是形参。
+- 将来具体调用的时候给定的类型可以看成是实参，**并且实参的类型只能是引用数据类型。**
+
+```java
+public class GenericDemo {
+    public static void main(String[] args) {
+        // 创建集合对象
+        // 没有使用泛型
+//        Collection c = new ArrayList();
+        Collection<String> c = new ArrayList<String>();
+
+        c.add("hello");
+        c.add("hworld");
+        c.add("java");
+//        c.add(100); // 会自动封装为Integer类型
+
+//        Iterator it = c.iterator();
+        Iterator<String> it = c.iterator();
+        while (it.hasNext()){
+//            Object obj = it.next();
+//            System.out.println(obj);
+            //向下转型
+           //  String s = (String)it.next();
+            String s = it.next();
+            System.out.println(s);
+        }
+    }
+}
+```
+
+泛型的好处：
+
+- 把运行期间的问题提前到了编译期间
+- 避免了强制类型转换
+
+
+
+## 3 泛型类
+
+> 定义格式
+
+- 格式：修饰符 class 类名 <类型>{ }
+- 范例：public class Generic<T>{ }
+  - 此处的T可以随便写为任意标识，常见的如T、E、K、V等形式的参数常用于表示泛型
+
+
+
+自定义一个泛型类：
+
+```java
+public class Generic<T> {
+    private T t;
+
+    public T getT() {
+        return t;
+    }
+
+    public void setT(T t) {
+        this.t = t;
+    }
+}
+```
+
+测试类：
+
+```java
+public class GenericDemo01 {
+    public static void main(String[] args) {
+        // 没有使用泛型类
+        Student stu = new Student();
+        stu.setName("林青霞");
+        System.out.println(stu.getName());
+
+        Teacher tea = new Teacher();
+        tea.setAge(34);
+        System.out.println(tea.getAge());
+
+        // 使用自定义的泛型类
+        System.out.println("------------------------");
+        Generic<String> ger = new Generic<String>();
+        ger.setT("林青霞");
+        System.out.println(ger.getT());
+
+        Generic<Integer> g = new Generic<Integer>();
+        g.setT(10);
+        System.out.println(g.getT());
+
+        Generic<Boolean> bool = new Generic<>();
+        bool.setT(true);
+        System.out.println(bool.getT());
+
+
+    }
+}
+```
+
+输出：
+
+```java
+林青霞
+34
+------------------------
+林青霞
+10
+true
+```
+
+
+
+## 4 泛型方法
+
+实例：
+
+```java
+public class GenericUtil<T> {
+//    public void show(String s){
+//        System.out.println(s);
+//    }
+//    public void show(Integer i){
+//        System.out.println(i);
+//    }
+//
+//    public void show(Boolean b){
+//        System.out.println(b);
+//    }
+
+    public void show(T t){
+        System.out.println(t);
+    }
+}
+```
+
+测试类：
+
+```java
+public class GenericDemo02 {
+    public static void main(String[] args) {
+//        GenericUtil g = new GenericUtil();
+//        g.show("lnqingxia");
+//        g.show(30);
+//        g.show(true);
+//        g.show(12.34);// 没有提供相应的方法
+
+//        使用的是泛型类
+		GenericUtil<String> g1 = new GenericUtil<>();
+        GenericUtil<Integer> g2 = new GenericUtil<>();
+        GenericUtil<Boolean> g3 = new GenericUtil<>();
+        g1.show("林青霞");
+        g2.show(30);
+        g3.show(true);
+    }
+}
+```
+
+输出：
+
+```
+林青霞
+30
+true
+```
+
+
+
+接下来使用**泛型方法**解决：
+
+泛型类：
+
+```java
+public class GenericUtil{
+    public <T> void show(T t){
+        System.out.println(t);
+    }
+}
+```
+
+测试类：
+
+```java
+public class GenericDemo02 {
+    public static void main(String[] args) {
+//        GenericUtil g = new GenericUtil();
+//        g.show("lnqingxia");
+//        g.show(30);
+//        g.show(true);
+//        g.show(12.34);// 没有提供相应的方法
+
+//        使用的是泛型类
+//        GenericUtil<String> g1 = new GenericUtil<>();
+//        GenericUtil<Integer> g2 = new GenericUtil<>();
+//        GenericUtil<Boolean> g3 = new GenericUtil<>();
+//        g1.show("林青霞");
+//        g2.show(30);
+//        g3.show(true);
+
+        GenericUtil g = new GenericUtil();
+        g.show("林青霞");
+        g.show(30);
+        g.show(true);
+        g.show(12.34);
+    }
+}
+```
+
+输出：
+
+```java
+林青霞
+30
+true
+12.34
+```
+
+总结：
+
+- 格式：修饰符 <类型> 返回值类型 方法名(类型 变量名){ }
+- 范例：public <T> void show(T t){ }
+
+
+
+## 5 泛型接口
+
+> 格式
+
+- 格式：修饰符 interface 接口名<类型> { }
+- 范例：public interface Generic<T>{ }
+
+实例：
+
+接口类：
+
+```java
+public interface GenericInterface<T> {
+    void show(T t);
+}
+```
+
+实现类：
+
+```java
+public class GenericImpl<T> implements GenericInterface<T> {
+
+
+    @Override
+    public void show(T t) {
+        System.out.println(t);
+    }
+}
+```
+
+测试类:
+
+```java
+public class GenericDemo03 {
+    public static void main(String[] args) {
+        GenericInterface<String> g1 = new GenericImpl<String>();
+        g1.show("林青霞");
+    }
+}
+```
+
+
+
+扩展：其实下面这个是 **泛型方法**
+
+接口类：
+
+```java
+public interface Generic2 {
+    <T> void show(T t);
+}
+```
+
+实现类：
+
+```java
+public class Generic2Impl implements Generic2 {
+
+    @Override
+    public <T> void show(T t) {
+        System.out.println(t);
+    }
+}
+```
+
+测试类：
+
+```java
+public class GenericDemo03 {
+    public static void main(String[] args) {
+        Generic2 gg1 = new Generic2Impl();
+        gg1.show(12.34);
+        gg1.show("string");
+        gg1.show(true);
+    }
+}
+```
+
+
+
+## 6 类型同配符
+
+为了表示各种泛型List的父类可以使用类型通配符
+
+- 类型通配符：<?>
+- List<?>：表示元素类型未知，它的元素可以匹配 **任何类型**
+- 这种带通配符的List仅表示它是各种泛型List的父类，**并不能把元素添加其中**
+
+
+
+如果说我们不希望List<?>是任何类型的父类，只希望它代表某一类泛型List的父类，可以使用类型通配符的上限
+
+- 类型通配符上限：<? extends 类型>
+- List<? extends Number>：它表示的类型是Number或者其子类型
+
+
+
+除了可以指定类型通配符的上限，我们也可以指定类型通配符的下限
+
+- 类型通配符下限：<? super 类型>
+- List<? super Number>：它表示的类型是Number或者其父类型
+
+示例：
+
+```java
+public class GenericDemo {
+    public static void main(String[] args) {
+        // 类型通配符<?>
+        List<?> list1 = new ArrayList<Object>();
+        List<?> list2 = new ArrayList<Number>();
+        List<?> list = new ArrayList<Integer>();
+
+        // 类型通配符的上限：<? extends 类型>
+//        List<? extends Number> list4 = new ArrayList<Object>();// 报错
+        List<? extends Number> list5 = new ArrayList<Number>();
+        List<? extends Number> list6 = new ArrayList<Integer>();
+
+        //类型通配符的下限：<? super 类型>
+        List<? super Number> list7 = new ArrayList<Object>();
+        List<? super Number> list8 = new ArrayList<Number>();
+//        List<? super Number> list9 = new ArrayList<Integer>();// 报错
+
+    }
+}
+```
+
+
+
+## 7 可变参数
+
+可变参数又称参数个数可变，用作方法的形参出现，那么方法参数就是可变的了
+
+- 格式：修饰符 返回值类型 方法名(数据类型... 变量名){ }
+- 范例：public static int sum(int... a){ }
+
+```java
+public class ArgsDemo {
+    public static void main(String[] args) {
+        System.out.println(sum(1,2));
+        System.out.println(sum(1,2,3));
+        System.out.println(sum(1,2,3,4));
+    }
+
+    public static int sum(int... a){
+//        System.out.println(a); // 输出数组
+//        return 0;
+        int sum=0;
+        for (int i:a){
+            sum+=i;
+        }
+//        System.out.println(a[1]); // a是一个数组
+        return sum;
+    }
+    
+//    public static int sum(int a, int b){
+//        return a+b;
+//    }
+//    public static int sum(int a, int b, int c){
+//        return a+b+c;
+//    }
+}
+```
+
+输出：
+
+```java
+3
+6
+10
+```
+
+注意：如果参数里面既有可变参数也有不可变参数，应该将不可变参数放在可变参数的前面
+
+```java
+public static int sum(int b, int... a){
+//        System.out.println(a); // 输出数组
+//        return 0;
+        int sum=0;
+        for (int i:a){
+            sum+=i;
+        }
+//        System.out.println(a[1]); // a是一个数组
+        return sum;
+    }
+```
+
+总结：
+
+- 这里的变量是一个数组
+- 如果一个方法有很多参数，包含可变参数，可变参数要放到最后
+
+
+
+
+
+## 8 可变参数的使用
+
+> **Arrays工具类中有一个静态方法**：
+
+- public static <T> List<T> asList(T... a)：返回由指定数组支持的固定大小的列表
+
+- 返回的集合不能做增删操作，可以做修改操作
+
+
+
+> **List接口中有一个静态方法：**
+
+- public static <E> List<E> of(E... elements)：返回包含任意数量元素的不可变列表
+
+- 返回的集合不能做增删改操作
+
+
+
+> **Set接口中有一个静态方法：**
+
+- public static <E> Set<E> of(E... elements)：返回一个包含任意数量元素的不可变集合
+
+- 在给元素的时候，不能给重复的元素
+- 返回的集合不能做增删操作，没有修改的方法
+
+```java
+public class ArgsDemo01 {
+    public static void main(String[] args) {
+        // public static <T> List<T> asList(T... a)：返回由指定数组支持的固定大小的列表
+        List<String> list = Arrays.asList("hello", "world", "java");
+
+
+//        list.add("python"); // UnsupportedOperationException
+//        list.remove("world"); // UnsupportedOperationException
+//        list.set(1, "javaeee");
+//        System.out.println(list);
+
+
+        // public static <E> List<E> of(E... elements)：返回包含任意数量元素的不可变列表
+//        List<String> list1 = List.of("hello", "world", "kjava","world");
+//
+//        list1.add("123");//UnsupportedOperationException
+//        list1.remove("hello"); // UnsupportedOperationException
+//        list1.set(1, "12");//UnsupportedOperationException
+//        System.out.println(list1);
+
+//        Set<String> set = Set.of("java", "hello", "world", "world");//IllegalArgumentException
+        Set<String> set = Set.of("java", "hello", "world");//IllegalArgumentException
+//        set.add("jjj");//UnsupportedOperationException
+//        set.add("hello");//UnsupportedOperationException
+//        set.remove("world");//UnsupportedOperationException
+        
+        System.out.println(set);
     }
 }
 ```
