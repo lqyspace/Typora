@@ -1857,3 +1857,224 @@ public class CopyJavaImproveDemo {
 
 ### 5.6 字符缓冲流
 
+- 字符缓冲流
+  - BufferedWriter：将文本写入字符输出流，缓冲字符，以提供单个字符，数组和字符串的高效输入，可以指定缓冲区的大小，或者可以接受默认值大小。默认值足够大，可用于大多数用途
+  - BufferedReader：从字符输入流读取文本，缓冲字符，已提供字符，数组和行的高效读取，可以指定缓冲区大小或者使用默认的缓冲区大小。默认值足够大，可用于大多数用途。
+- 构造方法
+  - BufferedWriter(Writer out)
+  - BufferedReader(Reader in)
+
+- 代码实例
+
+  ```java
+  public class BufferedStramDemo01 {
+      public static void main(String[] args) throws IOException {
+  //        FileWriter fw = new FileWriter("fw.txt");
+  //        BufferedWriter bw = new BufferedWriter(fw);
+  
+  //        BufferedWriter bw = new BufferedWriter(new FileWriter("bw.txt"));
+  //        bw.write("hello\r\n");
+  //        bw.write("world\r\n");
+  //        bw.close();
+  
+          BufferedReader br = new BufferedReader(new FileReader("bw.txt"));
+  
+          // 一次读一个字符数据
+  //        int ch;
+  //        while ((ch=br.read())!=-1){
+  //            System.out.print((char) ch);
+  //        }
+  
+          char[] chs = new char[1024];
+          int len;
+          while ((len=br.read(chs))!=-1){
+              System.out.println(new String(chs, 0, len));
+          }
+          br.close();
+      }
+  }
+  ```
+
+> 案例：复制java文件
+
+![image-20230319135653069](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303191357470.png)
+
+```java
+public class CopyJavaDemo {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br =  new BufferedReader(new FileReader("src\\algorithm\\RadixSortDemo.java"));
+        BufferedWriter bw = new BufferedWriter(new FileWriter("src\\RadixSortDemo.java"));
+        // 一次写一个字符数据
+//        int ch;
+//        while ((ch= br.read())!=-1){
+//            bw.write(ch);
+//        }
+
+        char[] chs = new char[1024];
+        int len;
+        while ((len=br.read(chs))!=-1){
+//            bw.write(new String(chs, 0, len));
+            bw.write(chs, 0, len);
+        }
+
+        bw.close();
+        br.close();
+
+    }
+}
+```
+
+
+
+> **字符缓冲流的特有功能**
+
+- BufferedWriter：
+  - void newLine()：写一行行分隔符，行分隔符字符串有系统属性定义；如果是windows系统，则是 \r\n，如果是linux ，则是 \n， 如果是mac，则是 \r。
+- BufferedReader：
+  - String readLine()：读一行文字，结果包含行的内容的字符串。不包括任何终止字符（即只读内容，不读换行符号），如果流的结尾已经到达，则为null。
+
+```java
+public class BufferedStreamDemo02 {
+    public static void main(String[] args) throws IOException {
+//        BufferedWriter bw = new BufferedWriter(new FileWriter("bww.txt"));
+//
+//        for (int i=0; i<10; i++){
+//            bw.write("hello");
+////            bw.write("\r\n");
+//            bw.newLine();// 在内容末尾添加换行符
+//            bw.flush();
+//        }
+//
+//        bw.close();
+
+        BufferedReader br =new BufferedReader(new FileReader("bww.txt"));
+//        第一次读取数据
+//        String line = br.readLine();
+//        System.out.println(line);
+//
+//        line = br.readLine();
+//        System.out.println(line);
+//        line = br.readLine();
+//        System.out.println(line);// null
+//        line = br.readLine();
+//        System.out.println(line);// null
+
+        String line;
+        while ((line=br.readLine())!=null){
+//            System.out.print(line);// hello0hello1
+            System.out.println(line);// 可以换行
+        }
+    }
+}
+```
+
+
+
+案例代码：
+
+```java
+public class CopyDemo01 {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader("src\\algorithm\\RadixSortDemo.java"));
+        BufferedWriter bw = new BufferedWriter(new FileWriter("src\\RadixSortDemo.java"));
+        String line;
+        while ((line=br.readLine())!=null){
+            bw.write(line);
+            bw.newLine();
+            bw.flush();
+        }
+
+        br.close();
+        bw.close();
+    }
+}
+```
+
+
+
+### 5.7 IO流小结
+
+![image-20230319144014625](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303191440785.png)
+
+![image-20230319144127267](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303191441433.png)
+
+![image-20230319144140963](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303191441023.png)
+
+案例总结：集合到文件
+
+```java
+public class ArrayListStramDemo {
+    public static void main(String[] args) throws IOException {
+        ArrayList<String> arr = new ArrayList<>();
+        arr.add("hello");
+        arr.add("hwolrd");
+        arr.add("java");
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter("arrbw.txt"));
+        for (String s:arr){
+            bw.write(s);
+            bw.newLine();
+            bw.flush();
+        }
+        bw.close();
+    }
+```
+
+
+
+案例总结：文件到集合
+
+```java
+public class ArrayListStreamDemo02 {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader("arrbw.txt"));
+        ArrayList<String> arr = new ArrayList<>();
+        String line;
+        while ((line=br.readLine())!=null){
+            arr.add(line);
+        }
+        br.close();
+
+        for (String s: arr){
+            System.out.println(s);
+        }
+    }
+}
+```
+
+
+
+案例：点名器
+
+```java
+public class DianMingQi {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader("bw.txt"));
+        ArrayList<String> arr = new ArrayList<>();
+        String line;
+        while ((line=br.readLine())!=null){
+            arr.add(line);
+        }
+
+        Random r = new Random();
+        System.out.println(arr.get(r.nextInt(arr.size())));
+
+    }
+}
+```
+
+![image-20230319151316025](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303191513100.png)
+
+![image-20230319151332565](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303191513652.png)
+
+![image-20230319151418403](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303191514481.png)
+
+![image-20230319151850994](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303191518092.png)
+
+![image-20230319151907815](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303191519897.png)
+
+![image-20230319151934843](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303191519926.png)
+
+![image-20230319151952606](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303191519703.png)
+
+![image-20230319152004963](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303191520042.png)
