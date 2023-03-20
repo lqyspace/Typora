@@ -505,33 +505,568 @@ public class CopyJavaDemo {
 
 
 
+## 5 对象序列化流
+
+### 5.1 对象序列化和反序列化
+
+对象序列化：就是将对象保存在磁盘中，或者在网络中传输对象
+
+这种机制就是使用一个**字节序列**表示一个对象，该字节序列包含：对象的类型，对象的数据和对象中存储的属性等信息，字节序列写到文件之后，相当于文件中持久保存了一个对象的信息。
+
+反之，该字节序列还可以从文件中读取回来，重构对象，对它进行反序列化
+
+
+
+要实现序列化和反序列化就要使用对象序列化刘和对象反序列化流：
+
+- 对象序列化流：`ObjectOutputStream`
+- 对象反序列化流：`ObjectInputStream`
+
+他们都是字节输入流。
+
+
+
+### 5.2 对象序列化流
+
+对象序列化流：`ObjectOutputStream`
+
+- 将Java对象的原始数据类型和图形写入`OutputStream`，可以使用`ObjectInputStream`读取（重构）对象。可以通过使用流的文件来实现对象的持久存储。如果流是网络套接字流，则可以在另一个主机上或者另一个进程中重构对象 
+
+
+
+构造方法：
+
+- `ObjectOutputStream(OutputStream out)`：创建一个写入指定的`OutputStream`的`ObjectOutputStream`
+
+
+
+序列化对象的方法：
+
+- `void writeObject(Object obj)`：将指定的对象写入`ObjectOutputStream`
+
+
+
+注意：
+
+- NotSerializableException：如果一个对象没有实现java.io.Serializable接口，那么该对象就不能被序列化，运行的时候会抛出此异常。
+- java.io.Serializable接口中没有方法，因此不需要重写方法
+
+```java
+public class ObjectOutputStreamDemo {
+    public static void main(String[] args) throws IOException {
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("oos.txt"));
+
+        //创建对象
+        Student s = new Student("林青霞",32);
+
+        oos.writeObject(s);
+
+        // 释放
+        oos.close();
+    }
+}
+```
+
+输出：
+
+```java
+Exception in thread "main" java.io.NotSerializableException: objectoutputstream.bean.Student
+	at java.base/java.io.ObjectOutputStream.writeObject0(ObjectOutputStream.java:1185)
+	at java.base/java.io.ObjectOutputStream.writeObject(ObjectOutputStream.java:349)
+	at objectoutputstream.ObjectOutputStreamDemo.main(ObjectOutputStreamDemo.java:17)
+```
+
+注意：在此例中，Student对象并没有继承Serializable接口
+
+更改：将Student对象序列化
+
+```java
+public class Student implements Serializable {
+    private String name;
+    private int age;
+
+    public Student() {
+    }
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+```
+
+此时测试通过。
+
+
+
+### 5.3 对象的反序列化
+
+对象的反序列化流 ：ObjectInputStream
+
+- ObjectInputStream反序列化先前使用ObjectOutputStream编写的原始数据和对象
+
+
+
+构造方法：
+
+- ObjectInputStream（InputStream in）：创建从指定的InputStream读取的ObjectInputStream
+
+
+
+反序列化对象的方法：
+
+- Object  readObject()：从ObjectInputStream读取一个对象
+
+```java
+public class ObjectInputStreamDemo {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream("oos.txt"));
+
+        //Object readObject（）:从ObjectInputStream读取一个对象
+        Object  obj = ois.readObject();
+
+        Student s = (Student) obj;
+        System.out.println(s.getName() + ","+s.getAge());
+
+        ois.close();
+    }
+}
+```
 
 
 
 
 
+### 5.4 对象序列化流的问题
+
+> **用对象序列化流序列化了一个对象后，假如我们修改了对象所属的类文件，读取数据会不会出问题？**
+
+**修改前：**
+
+学生类：
+
+```java
+public class Student implements Serializable {
+    private String name;
+    private int age;
+
+    public Student() {
+    }
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+```
+
+测试类：
+
+```java
+public class ObjectStreamDemo {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+//        write();
+        read();
+    }
+    // 反序列化
+    private static void read() throws IOException, ClassNotFoundException {
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream("oos.txt"));
+        Object obj = ois.readObject();
+        Student s = (Student) obj;
+        System.out.println(s.getName() + "," + s.getAge());
+        ois.close();
+    }
+    // 序列化
+    private static void write() throws IOException {
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("oos.txt"));
+        Student s = new Student("林青霞",32);
+        oos.writeObject(s);
+        oos.close();
+    }
+
+}
+```
+
+此时测试类可以正常通过：
+
+现在开始修改Student的类文件：
+
+**修改后：**
+
+学生类：
+
+```java
+public class Student implements Serializable {
+    private String name;
+    private int age;
+
+    public Student() {
+    }
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+}
+```
+
+我们在学生类里面加了一个`toString`方法，接下来运行测试类：爆出异常
+
+```java
+Exception in thread "main" java.io.InvalidClassException: objectoutputstream.bean.Student; local class incompatible: stream classdesc serialVersionUID = -6907431380092395188, local class serialVersionUID = -2413673435791492435
+	at java.base/java.io.ObjectStreamClass.initNonProxy(ObjectStreamClass.java:689)
+	at java.base/java.io.ObjectInputStream.readNonProxyDesc(ObjectInputStream.java:1903)
+	at java.base/java.io.ObjectInputStream.readClassDesc(ObjectInputStream.java:1772)
+	at java.base/java.io.ObjectInputStream.readOrdinaryObject(ObjectInputStream.java:2060)
+	at java.base/java.io.ObjectInputStream.readObject0(ObjectInputStream.java:1594)
+	at java.base/java.io.ObjectInputStream.readObject(ObjectInputStream.java:430)
+	at objectoutputstream.ObjectStreamDemo.read(ObjectStreamDemo.java:15)
+	at objectoutputstream.ObjectStreamDemo.main(ObjectStreamDemo.java:10)
+```
+
+我们来看一下InvalidClassException这个类的说明：
+
+![image-20230320133756560](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303201337644.png)
+
+由于Student类中不包含未知的数据类型，也有可访问的无参构造方法。因此抛出这个异常的原因是：**类的串行版本与从流中读取的类的描述符不匹配**。
 
 
 
+从上面的报错中，我们可以看到 `serialVersionUID`并不一致。关于这个具体的描述，我们可以取序列化接口中去查看。
+
+![image-20230320184432725](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303201844808.png)
+
+![image-20230320185213060](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303201852128.png)
 
 
 
+> **如果出问题了，该如何解决？**
+
+![image-20230320185326156](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303201853215.png)
+
+在可序列化类中加入：
+
+```java
+private static final long serialVersionUID = 42L;
+```
+
+这样就会有一致的序列化号。
 
 
 
+> **如果一个对象中的某一个成员变量的值不想被序列化，又该如何实现呢？**
+
+可以在不想序列化的变量前面加 `transient`，这样这个指定的变量就不参与序列化。
+
+测试类：由于age没有参与序列化，所以输出为0,  0是对象的属性age的默认值。
+
+```java
+public class ObjectStreamDemo {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+//        write();
+        read();
+    }
+    // 反序列化
+    private static void read() throws IOException, ClassNotFoundException {
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream("oos.txt"));
+        Object obj = ois.readObject();
+        Student s = (Student) obj;
+        System.out.println(s.getName() + "," + s.getAge());
+        ois.close();
+    }
+    // 序列化
+    private static void write() throws IOException {
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("oos.txt"));
+        Student s = new Student("林青霞",32);
+        oos.writeObject(s);
+        oos.close();
+    }
+
+}
+```
+
+输出：
+
+```java
+林青霞,0
+```
+
+学生类：
+
+```java
+public class Student implements Serializable {
+    private String name;
+    private transient int age;
+    private static final long serialVersionUID = 1L;
+
+    public Student() {
+    }
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+//    @Override
+//    public String toString() {
+//        return "Student{" +
+//                "name='" + name + '\'' +
+//                ", age=" + age +
+//                '}';
+//    }
+}
+```
 
 
 
+## 6 Properties
+
+### 6.1 Properties作为Map集合的使用
+
+Properties概述：
+
+- 是一个Map体系的集合类
+- Properties可以保存到流中或从流中加载
+- 属性列表中的每个键及其对应的值都是一个字符串。
 
 
 
+Properties基本使用：
+
+```java
+public class PropertiesDemo {
+    public static void main(String[] args) {
+//        Properties<String, String> prop = new Properties<>();// 写法错误
+        Properties properties = new Properties();
+
+        // 存储元素
+        properties.put("001","张曼玉");
+        properties.put("002","张曼玉2");
+        properties.put("003","张曼玉3");
+
+        Set<Object> keySet = properties.keySet();
+        for (Object obj: keySet){
+            Object value = properties.get(obj);
+            System.out.println(obj + "," + value);
+        }
+    }
+}
+```
+
+注：不能写泛型
 
 
 
+### 6.2 Properties作为Map集合的特有方法
+
+![image-20230320214852874](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303202148006.png)
 
 
 
+```java
+public class PropertiesDemo02 {
+    public static void main(String[] args) {
+        Properties prop = new Properties();
+        prop.setProperty("001", "张曼玉");
+        /*
+        * public synchronized Object setProperty(String key, String value) {
+              return put(key, value);
+          }
+
+        * @Override
+          public synchronized Object put(Object key, Object value) {
+              return map.put(key, value);
+          }
+          *
+          * 这就使原本接受Object类型的，现在只能接受String
+        * */
+        prop.setProperty("002", "张曼玉2");
+        prop.setProperty("003", "张曼玉3");
+
+        System.out.println(prop.getProperty("002"));
+        System.out.println(prop.getProperty("00111"));// null
+
+        Set<String> names = prop.stringPropertyNames();
+        for (String s: names){
+//            System.out.println(s);
+            String value = prop.getProperty(s);
+            System.out.println(s + "," + value);
+        }
+    }
+}
+```
 
 
 
+### 6.3 Properties和IO流相结合的方法
+
+![image-20230320222917069](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303202229209.png)
+
+```java
+public class PropertiesandIODemo {
+    public static void main(String[] args) throws IOException {
+//        myStore();
+        myLoad();
+    }
+
+    private static void myLoad() throws IOException {
+        Properties prop = new Properties();
+        FileReader fr = new FileReader("src\\fw.txt");
+        prop.load(fr);
+        fr.close();
+        System.out.println(prop);
+    }
+
+    public static void myStore() throws IOException {
+        Properties prop = new Properties();
+        prop.setProperty("001", "张曼玉");
+        prop.setProperty("002", "张曼玉2");
+        prop.setProperty("003", "张曼玉3");
+
+        FileWriter fw = new FileWriter("src\\fw.txt");
+        prop.store(fw, null); // 如果不写描述信息可以为空
+        fw.close();
+    }
+}
+```
+
+
+
+### 6.4 案例：游戏次数
+
+![image-20230320224730693](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303202247815.png)
+
+
+
+```java
+public class PlayCountDemo {
+    public static void main(String[] args) throws IOException {
+        load();
+    }
+
+    private static void load() throws IOException {
+        Properties prop = new Properties();
+
+        FileReader fr = new FileReader("src\\game.txt");
+        prop.load(fr);
+        fr.close();
+
+        String count = prop.getProperty("count");
+        int num = Integer.parseInt(count);
+
+        if (num>=3){
+            System.out.println("游戏结束");
+        }else{
+            GuessNumber.start();
+            num++;
+            prop.setProperty("count", String.valueOf(num));
+            FileWriter fw = new FileWriter("src\\game.txt");
+            prop.store(fw,null);
+            fw.close();
+        }
+    }
+}
+```
+
+游戏类：
+
+```java
+public class GuessNumber {
+    private GuessNumber(){
+
+    }
+
+    public static void start(){
+        // 随机初始化一个数字
+        Random r = new Random();
+        int number = r.nextInt(100)+1; // 1-100
+        while (true){
+            Scanner sc = new Scanner(System.in);
+            System.out.println("请输入你要猜的数字：");
+            int guessNumber = sc.nextInt();
+
+            if (guessNumber > number){
+                System.out.println("你要猜的数字" + guessNumber + "大了");
+            }else if (guessNumber < number){
+                System.out.println("你要猜的数字" + guessNumber + "小了");
+            }else {
+                System.out.println("恭喜你猜中了");
+                break;
+            }
+        }
+    }
+}
+```
 
