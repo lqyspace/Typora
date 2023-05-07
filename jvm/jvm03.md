@@ -22,7 +22,7 @@
 
 ​	`—XX:MetaspaceSize=20M -XX:MaxMetaspaceSize=20M`
 
-5、元空间很少有GC垃圾收集，一般该区域回售条件苛刻，能回收的信息很少，所以GC很少回收。
+5、元空间很少有GC垃圾收集，一般该区域回收条件苛刻，能回收的信息很少，所以GC很少回收。
 
 6、元空间内存不足时，将抛出OutOfMemoryError。
 
@@ -32,7 +32,7 @@
 
 1、直接内存（Directory Memory）不属于JVM运行时数据区，是本机直接物理内存。
 
-2、像在JDK1.4 中新加入了NIO（New Input/Output）类，一种基于通道（Channel）与缓冲区（Buffer）的I/O方式，它可以直接通过Native函数直接分配堆外内存，然后通过一个存储在Java堆中的DirectByteBuffer对象作为这块内存的引用进行操作，这样能在一些场景中显著提升性能，因为避免了在Java堆和Native堆中来回复制数据。
+2、像在JDK1.4 中新加入了NIO（New Input/Output）类，一种基于通道（Channel）与缓冲区（Buffer）的I/O方式，**它可以直接通过Native函数直接分配堆外内存**，然后通过一个存储在Java堆中的DirectByteBuffer对象作为这块内存的引用进行操作，这样能在一些场景中显著提升性能，因为避免了在Java堆和Native堆中来回复制数据。
 
 3、可能导致OutOfMemory异常出现；（netty的底层使用了NIO，因此可能会报错OutOfMemory异常）
 
@@ -42,7 +42,7 @@
 
 ![image-20230505113211447](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305051132673.png)
 
-直接内存（Directory Memory）的容量大小可以通过：`-XX:MaxDirectMemorySize`参数来指定，该参数表示设置 New I/O（java.noi程序包）直接缓冲区分配的最大总大小（以字节为单位）；默认情况下，大小设置为0，这意味着JVM自动为NIO直接缓冲区分配选择大小。
+直接内存（Directory Memory）的容量大小可以通过：`-XX:MaxDirectMemorySize`参数来指定，该参数表示设置 New I/O（java.nio程序包）直接缓冲区分配的最大总大小（以字节为单位）；默认情况下，大小设置为0，这意味着JVM自动为NIO直接缓冲区分配选择大小。
 
 ![image-20230505113306095](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305051133191.png)
 
@@ -58,7 +58,7 @@
 
 ![image-20230505132154208](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305051321269.png)
 
-**查看默认的的堆大小即默认的垃圾收集器：**
+**查看默认的堆大小即默认的垃圾收集器：**
 
 ```
 java -XX:+PrintCommandLineFlags -version
@@ -80,7 +80,7 @@ java -XX:+PrintCommandLineFlags -version
 
 **1、绝大多数的对象都是朝生夕灭**
 
-如果一个区域中大多数的对象都是朝生夕灭，那么把他们集中放在一起，每次回收时只关注如何保留少量的存活对象，而不是去标记那些大量将要被回收的对象，就能以较低的代价回收到大量的控件。
+如果一个区域中大多数的对象都是朝生夕灭，那么把他们集中放在一起，每次回收时只关注如何保留少量的存活对象，而不是去标记那些大量将要被回收的对象，就能以较低的代价回收到大量的空间。
 
 
 
@@ -118,15 +118,15 @@ Mixed GC：**混合收集**，收集整个新生代以及部分老年代的垃�
 
 **1、如果没有Survivor区会怎么样**
 
-此时每触发一次Minor GC，就会把Eden区的对象复制到老年代，这样当老年代满了以后就会触发Major GC/Full GC（通常伴随着Minor GC），比较耗时，所以必须要有Survivor区；
+此时每触发一次Minor GC，就会把Eden区的存活对象复制到老年代，这样当老年代满了以后就会触发Major GC/Full GC（通常伴随着Minor GC），Full GC比较慢也比较耗时，要尽量避免Full GC，所以必须要有Survivor区；
 
 
 
 **2、如果只有一个Survivor区会怎么样**
 
-刚刚创建的对象在Eden区中，一旦Eden满了，触发一次Minor GC，Eden中存活的对象就会移动到Survivor中，下一次Eden满了的时候，此时进行Minor GC，Eden和Survivor中垃圾都会被回收，但是将Eden垃圾回收以后Eden会有一部分存活的对象，Survivor区也会有一部分存活的对象，Survivor区中的对象是离散的分布，会有一些空闲碎片，但是如果此时Eden区中存活的对象是一个比较大的对象，那就难以将这个对象复制到Survivor区中，Survivor中没有连续的空间存储这个大对象，那就会又触发一次Minor GC，又会清理一些对象，以便能够放的下那个大对象。此时就不得不使用 “标记-整理”的方法把Survivor区中离散的对象整理为连续空间的对象。
+刚刚创建的对象在Eden区中，一旦Eden满了，触发一次Minor GC，Eden中存活的对象就会移动到Survivor中，下一次Eden满了的时候，此时进行Minor GC，Eden和Survivor中垃圾都会被回收，但是将Eden垃圾回收以后Eden会有一部分存活的对象，Survivor区也会有一部分存活的对象，Survivor区中的对象是离散的分布，会有一些空闲碎片，但是如果此时Eden区中存活的对象是一个比较大的对象，那就难以将这个对象复制到Survivor区中，Survivor中没有连续的空间存储这个大对象，那就会又触发一次Minor GC，又会清理一些对象，以便能够放的下那个大对象。此时就不得不使用 “标记-整理”的方法把Survivor区中离散的对象整理为连续空间的对象，这样做也是比较损耗性能的。
 
-如果此时还有另外一个Survivor区的话，那么就可以把Eden和Survivor区中存活的对象整齐的复制到另一个Survivor区中，然后直接清空Eden和Survivor区就行。
+如果此时还有另外一个Survivor1区的话，那么就可以把Eden和Survivor0区中存活的对象整齐的复制到另一个Survivor1区中，然后直接清空Eden和Survivor0区就行。
 
 
 
@@ -152,7 +152,7 @@ Mixed GC：**混合收集**，收集整个新生代以及部分老年代的垃�
 
 **1、标记**
 
-标记出所有需要回收的对象，在标记完成以后，统一回收掉所有被标记的对象，也可以反过来，标记出所有存活的对象，在标记完成后，统一回收所有未被标记的对象，标记过程就是对象是否属于垃圾的判定过程，基于 **可达性分析算法** 判断对象是否可以回收。
+**标记出所有需要回收的对象**，在标记完成以后，统一回收掉所有被标记的对象，也可以反过来，**标记出所有存活的对象**，在标记完成后，统一回收所有未被标记的对象，标记过程就是对象是否属于垃圾的判定过程，基于 **可达性分析算法** 判断对象是否可以回收。
 
 **2、清除**
 
@@ -164,7 +164,7 @@ Mixed GC：**混合收集**，收集整个新生代以及部分老年代的垃�
 
 缺点：1、执行效率不稳定，如果Java堆中包含大量的对象，而且其中大部分是需要被回收的，这是必须进行大量的标记和清除的动作，导致标记和清除两个过程的执行效率都随着对象数量增长而降低。
 
-​			2、**内存空间的碎片化问题**，标记，清除之后会产生大量的不连续的内存碎片，空间碎片太多可能会导致当以后在程序中需要分配较大对象时无法找到足够的连续内存而不得不提前出发另一次垃圾回收器。
+​			2、**内存空间的碎片化问题**，标记，清除之后会产生大量的不连续的内存碎片，空间碎片太多可能会导致当以后在程序中需要分配较大对象时无法找到足够的连续内存而不得不提前触发另一次垃圾回收。
 
 
 
@@ -180,6 +180,7 @@ Mixed GC：**混合收集**，收集整个新生代以及部分老年代的垃�
 
 - 代价太大，将可用内存缩小一半，空间浪费太多了
 - 另外对象存活率较高时就要进行较多的复制操作，效率会降低。
+- 该算法不适合老年代，因为老年代中大部分的对象都需要存活，每次复制就需要复制大量的对象，效率降低。
 
 一般虚拟机都会采用该算法来回收新生代，但是JVM对复制算法进行了改进，**JVM并没有按照1:1的比例来划分新生代的内存空间**，因为通过大量的统计和研究表明，90%以上的对象都是朝生夕灭的，所以JVM把新生代分为一块较大的Eden区和两个较小的Survivor区。每次使用只使用其中的Eden区和其中一块Survivor区，发生垃圾回收时，将Eden区和Survivor区中仍然存活的对象复制到另一块Survivor空间上，然后直接清理掉Eden和已用过的那块Survivor空间，HotSpoot虚拟机默认Eden和Survivor的大小比例是：8:1:1 ，即每次新生代中可用内存空间为整个新生代容量的90%（Eden的80%加上一个Survivor的10%），只有另外一个Survivor空间即10%的新生代会被浪费，当然，90%的对象可被回收仅仅是大部分的情况，我们无法百分百的保证每次回收只有不多于10%的对象存活，因此JVM还有一个安全担保机制的安全设计，当Survivor空间不足以容纳一次Minor GC之后存活的对象时，就需要依赖其他内存区域（实际上就是老年代）进行空间分配担保（Handle Promotion，也就是冒险Minor GC一下）。
 
@@ -262,7 +263,7 @@ Mixed GC：**混合收集**，收集整个新生代以及部分老年代的垃�
 
 它是**新生代收集器**，就是Serial收集器的**多线程版本**，大部分基本一样，单CPU下，ParNew还需要切换线程，可能还不如Serial；
 
-Serial和ParNew收集器可以配合CMS收集器，前者手机新生代，后者收集老年代，“-XX:+UseConcMarkSweepGC”：指定使用CMS以后，会默认使用ParNew作为新生代垃圾收集器。
+Serial和ParNew收集器可以配合CMS收集器，前者收集新生代，后者收集老年代，“-XX:+UseConcMarkSweepGC”：指定使用CMS以后，会默认使用ParNew作为新生代垃圾收集器。
 
 “-XX:+UseParNewGC”：强制指定使用ParNew
 
@@ -278,13 +279,79 @@ Serial和ParNew收集器可以配合CMS收集器，前者手机新生代，后�
 
 ![image-20230505214433837](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305052256530.png)
 
-简称Parallel，它是新生代收集器，基于**复制算法**，并行的多线程收集器（与ParNew收集器类似），侧重于达到一个可控的吞吐量，虚拟机运行100分钟，垃圾收集1分钟，则吞吐量为99%，有的时候我们也把垃圾收集器叫吞吐量垃圾收集器或者吞吐量优先的垃圾收集器；
+简称Parallel，它是新生代收集器，基于**复制算法**，**并行的多线程收集器**（与ParNew收集器类似），侧重于**达到一个可控的吞吐量**，虚拟机运行100分钟，垃圾收集1分钟，则吞吐量为99%，有的时候我们也把垃圾收集器叫吞吐量垃圾收集器或者吞吐量优先的垃圾收集器； **而且这个垃圾收集器是jvm默认的垃圾收集器。**
 
 它提供一个参数设置吞吐量：
 
 `-XX:MaxGCPuaseMillis`该参数设置大于0的毫秒数，每次GC的时间将尽量保持不超过设定的值，但是这个值也不是越小越好，GC暂停时间越短，那么GC的次数就变得越频繁。
 
-`-XX:+UseAdaptiveSizePolicy`自适应新生代大小策略，默认这个参数是开启的，当这个参数被开启之后，就不需要人工指定新生代的大小（-Xmn）、Eden与Survivor区的比例（-XX:SurvivorRatio）、晋升老年代对象的大小（-XX:PretenureSizeThreshold）等细节参数，虚拟机会根据当前系统的运行情况收集性能监控信息，动态调整这些参数已提供最适合的停顿时间获得最大的吞吐量
+`-XX:+UseAdaptiveSizePolicy`自适应新生代大小策略，默认这个参数是开启的，当这个参数被开启之后，就不需要人工指定新生代的大小（`-Xmn`）、Eden与Survivor区的比例（`-XX:SurvivorRatio`）、晋升老年代对象的大小（`-XX:PretenureSizeThreshold`）等细节参数，虚拟机会根据当前系统的运行情况收集性能监控信息，动态调整这些参数已提供最适合的停顿时间获得最大的吞吐量，这种调节方式称为垃圾收集的自适应的调节策略（GC Ergonomics）；如果我们不知道怎么对jvm进行调优，我们可以使用Parallel Scavenge收集器配合自适应调节策略，把内存管理的调有任务交给虚拟机去完成或许是一个不错的选择，只需要把基本的内存数据设置好（如-Xmx设置最大堆），然后使用 `-XX:MaxGCPauseMillis` 参数（最大停顿时间），那具体参数的调节细节可以交给虚拟机完成，自适应调节策略是Parallel Scavenge收集器区别于ParNew收集器的一个重要特性。
+
+参数： `-XX:+UseParallelGC` 指定使用Parallel Scavenge 垃圾收集器。
+
+`java -XX:+PrintCommandLineFlags -version` 打印jvm默认初始堆和最大堆大小以及垃圾收集器
+
+`java -XX:+PrintFlagsFinal -version` 打印jvm默认的参数值；
+
+`java -XX:+PrintFlagsFinal -version` 打印jvm所有的默认的参数值；
+
+[虚拟机参数官方文档](https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html#BGBCIEFC)
+
+`-XX:+PrintGCDetails`
+
+`-XX:+PrintGCDateStamps`
+
+`-Xloggc:d:/dev/gc.log` 打印日志（包含以上共三行代码）
+
+Parallel Scavenge 垃圾收集器中的Ergonomics负责自动的调节gc暂停时间和吞吐量之间的平衡，自动优化虚拟机性能；
+
+下面是打印的日志：
+
+![image-20230506192303742](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305061923819.png)
+
+![image-20230506193050418](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305061930576.png)
+
+
+
+## 3.17 Serial Old收集器
+
+它是Serial收集器的老年代版本，同Serial一样，单线程，可在Client模式下运行，也可在Server模式下使用，采用 **标记-整理** 算法，Serial Old收集器也可以作为 CMS 收集器发生失败时的后备预案，在并发收集发生Concurrent Mode Failure时使用；
+
+![image-20230506200650093](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305062006187.png)
+
+
+
+![image-20230506201239774](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305062012857.png)
+
+
+
+## 3.18 Parallel Old 收集器
+
+是 **Parallel Scavenge** 的老年版本，多线程，标记整理算法，它是jdk1.6开始提供的；
+
+在注重吞吐量和CPU的情况下，Parallel Scavenge新生代 + Parallel Old老年代是一个很好的搭配。
+
+参数： `-XX:+UseParallelOldGC` 指定使用 Parallel Old 收集器；
+
+![image-20230506204030784](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305062040906.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
