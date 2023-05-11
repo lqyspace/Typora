@@ -279,19 +279,17 @@ Serial和ParNew收集器可以配合CMS收集器，前者收集新生代，后�
 
 ![image-20230505214433837](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305052256530.png)
 
-简称Parallel，它是新生代收集器，基于**复制算法**，**并行的多线程收集器**（与ParNew收集器类似），侧重于**达到一个可控的吞吐量**，虚拟机运行100分钟，垃圾收集1分钟，则吞吐量为99%，有的时候我们也把垃圾收集器叫吞吐量垃圾收集器或者吞吐量优先的垃圾收集器； **而且这个垃圾收集器是jvm默认的垃圾收集器。**
+简称Parallel，它是**新生代**收集器，基于**复制算法**，**并行的多线程收集器**（与ParNew收集器类似），侧重于**达到一个可控的吞吐量**，虚拟机运行100分钟，垃圾收集1分钟，则吞吐量为99%，有的时候我们也把垃圾收集器叫吞吐量垃圾收集器或者吞吐量优先的垃圾收集器； **而且这个垃圾收集器是jvm默认的垃圾收集器。**
 
 它提供一个参数设置吞吐量：
 
 `-XX:MaxGCPuaseMillis`该参数设置大于0的毫秒数，每次GC的时间将尽量保持不超过设定的值，但是这个值也不是越小越好，GC暂停时间越短，那么GC的次数就变得越频繁。
 
-`-XX:+UseAdaptiveSizePolicy`自适应新生代大小策略，默认这个参数是开启的，当这个参数被开启之后，就不需要人工指定新生代的大小（`-Xmn`）、Eden与Survivor区的比例（`-XX:SurvivorRatio`）、晋升老年代对象的大小（`-XX:PretenureSizeThreshold`）等细节参数，虚拟机会根据当前系统的运行情况收集性能监控信息，动态调整这些参数已提供最适合的停顿时间获得最大的吞吐量，这种调节方式称为垃圾收集的自适应的调节策略（GC Ergonomics）；如果我们不知道怎么对jvm进行调优，我们可以使用Parallel Scavenge收集器配合自适应调节策略，把内存管理的调有任务交给虚拟机去完成或许是一个不错的选择，只需要把基本的内存数据设置好（如-Xmx设置最大堆），然后使用 `-XX:MaxGCPauseMillis` 参数（最大停顿时间），那具体参数的调节细节可以交给虚拟机完成，自适应调节策略是Parallel Scavenge收集器区别于ParNew收集器的一个重要特性。
+`-XX:+UseAdaptiveSizePolicy`自适应新生代大小策略，默认这个参数是开启的，当这个参数被开启之后，就不需要人工指定新生代的大小（`-Xmn`）、Eden与Survivor区的比例（`-XX:SurvivorRatio`）、晋升老年代对象的大小（`-XX:PretenureSizeThreshold`）等细节参数，虚拟机会根据当前系统的运行情况收集性能监控信息，动态调整这些参数以提供最适合的停顿时间获得最大的吞吐量，这种调节方式称为垃圾收集的自适应的调节策略（GC Ergonomics）；如果我们不知道怎么对jvm进行调优，我们可以使用Parallel Scavenge收集器配合自适应调节策略，把内存管理的调优任务交给虚拟机去完成或许是一个不错的选择，只需要把基本的内存数据设置好（如-Xmx设置最大堆），然后使用 `-XX:MaxGCPauseMillis` 参数（最大停顿时间），那具体参数的调节细节可以交给虚拟机完成，自适应调节策略是Parallel Scavenge收集器区别于ParNew收集器的一个重要特性。
 
 参数： `-XX:+UseParallelGC` 指定使用Parallel Scavenge 垃圾收集器。
 
 `java -XX:+PrintCommandLineFlags -version` 打印jvm默认初始堆和最大堆大小以及垃圾收集器
-
-`java -XX:+PrintFlagsFinal -version` 打印jvm默认的参数值；
 
 `java -XX:+PrintFlagsFinal -version` 打印jvm所有的默认的参数值；
 
@@ -327,7 +325,7 @@ Parallel Scavenge 垃圾收集器中的Ergonomics负责自动的调节gc暂停�
 
 ## 3.18 Parallel Old 收集器
 
-是 **Parallel Scavenge** 的老年版本，多线程，标记整理算法，它是jdk1.6开始提供的；
+是 **Parallel Scavenge** 的老年版本，**多线程**，**标记整理**算法，它是jdk1.6开始提供的；
 
 在注重吞吐量和CPU的情况下，Parallel Scavenge新生代 + Parallel Old老年代是一个很好的搭配。
 
@@ -339,39 +337,211 @@ Parallel Scavenge 垃圾收集器中的Ergonomics负责自动的调节gc暂停�
 
 
 
+## 3.19 CMS收集器
+
+![image-20230506200650093](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305062006187.png)
+
+![image-20230508103529570](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305081035740.png)
+
+![image-20230508104206958](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305081042046.png)
+
+注意：老年代是CMS垃圾收集器，新生代就是ParNew垃圾收集器。
+
+![image-20230508105509595](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305081055693.png)
+
+![image-20230508110708458](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305081107620.png)
+
+![image-20230508110736940](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305081107100.png)
+
+
+
+**CMS垃圾收集器的缺点：**
+
+1、并发收集会占用CPU资源，在 **重新标记** 和 **并发清除** 阶段都是可以和用户线程并发执行的，因此会和用户线程抢占CPU资源，如果是CPU数量小的情况，会特别占用用户线程，对执性能下降，CMS默认启动的回收线程数（处理器核心数量 + 3）/ 4；
+
+2、会产生浮动垃圾，因为你并发清除的时候用户线程可能还在产生垃圾，这些垃圾没有清除，而且你不能让老年代填满了再清除，你要给用户线程留一定的空间，所以jdk1.5默认是老年代68%了就触发回收，jdk1.6则提升到92%；
+
+通过 `-XX:CMSInitiatingOccupancyFraction` 参数设置
+
+默认设置取 `-XX:CMSTriggerRatio` 的值，默认是`80%`；
+
+![image-20230508153831665](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305081538860.png)
+
+![image-20230508153925908](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305081539095.png)
+
+![image-20230508154025358](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305081540517.png)
+
+![](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305081600613.png)
+
+
+
+## 3.20 G1收集器
+
+![image-20230508214821494](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305082148572.png)
+
+![image-20230508215042589](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305082150800.png)
+
+![image-20230508213742505](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305082137595.png)
+
+![image-20230508213824420](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305082138488.png)
+
+jdk8使用的垃圾收集器是：Parallel Scavenge新生代 + Parallel Old 老年代
+
+jdk9开始使用的垃圾收集器：G1
+
+
+
+> **G1垃圾收集器的基本原理**
+
+![image-20230508220431975](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305082204178.png)
+
+![image-20230508220522863](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305082205016.png)
 
 
 
 
 
+> **G1垃圾收集器如何做到可预测的停顿时间**
+
+1、这与G1垃圾收集器独特的涉及有关，它最大的特点就是把Java整个堆内存拆分为多个大小相等的Region；
+
+![image-20230508220934254](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305082209348.png)
+
+**humongous：大对象，可能跨多个区。**
+
+eden区，survivor区，old区可能连续也可能不连续。
+
+2、G1它会追踪每个Region的回收价值，即它会计算每个Region里面的对象有多少是垃圾，如果对这个Region进行回收，需要耗费多长的时间，可以回收掉多少的垃圾？
+
+3、G1收集器之所以能建立可预测的停顿时间模型，是因为它将Region作为垃圾回收的最小单元，即每次可选择一部分Region进行收集，避免在整个Java堆中进行全区域的垃圾收集，让G1收集器去追踪各个Region里面的垃圾的“回收价值”，然后根据用户设定的收集停顿时间（使用参数 `-XX:MaxGCPauseMillis` 指定，默认值是200毫秒），然后在后台维护一个优先级列表，优先处理回收价值大的那些Region，这也是“Garbage First”名字的由来，这种使用Region划分堆内存空间，基于回收价值的回收方式，保证了G1收集器在有限的时间里尽可能收集多的垃圾；
+
+比如：G1通过追踪发现，1个Region中的垃圾对象有10MB，回收它需要耗时500毫秒，另一个RegionVS的垃圾对象有20MB，回收它需要耗费100毫秒，那么G1垃圾收集器基于回收价值会选择回收20MB只需要100毫秒的Region。
+
+
+
+> **G1垃圾回收器的新生代垃圾回收**
+
+![image-20230508224205746](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305082242871.png)
+
+![image-20230508230101752](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305082301923.png)
+
+![image-20230508230453662](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305082304783.png)
+
+![image-20230508230510182](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305082305244.png)
+
+
+
+> **G1垃圾收集器中的大对象**
+>
+> Region中的Humongous区域，专门用来存放大对象；
+
+![image-20230508231330342](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305082313507.png)
+
+![image-20230508231552384](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305082315466.png)
 
 
 
 
 
+> **G1垃圾收集器内存大小如何设置**
+
+![image-20230509230955548](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305092309671.png)
+
+将JVM的堆，对于G1的垃圾收集器来说，就是划分为很多个Region，每个Region都是大小相等的
+
+每个Region=1m~32m，最多有2048个region。
+
+![image-20230509231247808](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305092312924.png)
+
+![image-20230509231748213](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305092317380.png)
+
+![image-20230509231831718](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305092318783.png)
+
+---
+
+![image-20230509232008379](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305092320525.png)
+
+![image-20230509232628721](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305092326856.png)
+
+---
+
+> **G1垃圾收集器新生代回收**
+
+![image-20230509235011677](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305092350791.png)
+
+![image-20230509235105768](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305092351856.png)
+
+![image-20230509235039304](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305092350518.png)
+
+![image-20230509235129012](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305092351082.png)
+
+> ****
 
 
 
+> **G1垃圾收集器老年代回收**
+
+![image-20230510220523279](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305102205567.png)
+
+![image-20230510220548476](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305102205726.png)
+
+![image-20230510224826739](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305102248901.png)
 
 
 
+> **G1垃圾收集器的混合垃圾回收**
+
+![image-20230510225001976](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305102250184.png)
+
+![image-20230510225145159](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305102251271.png)
 
 
 
+> **G1回收失败时的Full GC**
+
+![image-20230510225331274](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305102253523.png)
+
+所以G1的垃圾收集器相当于有四种：
+
+1、新生代垃圾回收
+
+2、老年代垃圾回收
+
+3、混合回收
+
+4、Full GC
 
 
 
+> **什么时候使用G1垃圾收集器**
+
+![image-20230510231705538](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305102317709.png)
+
+jdk8用的是CMS垃圾收集器，jdk9及以后默认用的是G1的垃圾收集器。
+
+![image-20230510231941784](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305102319943.png)
 
 
 
+## 3.21 ZGC收集器
+
+![image-20230510232051935](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305102320111.png)
 
 
 
+## 3.22 Shenandoah收集器
+
+![image-20230510232227814](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305102322002.png)
 
 
 
+## 3.23 内存溢出与内存泄漏
 
+![image-20230510232352914](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305102323080.png)
 
+![image-20230510232539859](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305102325001.png)
 
+![image-20230510232649316](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305102326451.png)
 
+![image-20230510232713277](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202305102327408.png)
 
