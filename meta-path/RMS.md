@@ -107,6 +107,9 @@
   - 实体
   - 实体关系
 
+- Amazon Data
+  - https://cseweb.ucsd.edu/~jmcauley/datasets/amazon_v2/
+
 ## 如何评价性能
 
 > 基本过程
