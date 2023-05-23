@@ -65,6 +65,12 @@ python -m pip install jupyter_nbextensions_configurator
 
 推荐博客：
 
+配置远程服务器用这个：
+
+https://zhuanlan.zhihu.com/p/375369748
+
+链接远程服务器推荐下面这个：
+
 [https://blog.csdn.net/qq_18256855/article/details/125439096](https://blog.csdn.net/qq_18256855/article/details/125439096)
 
 
