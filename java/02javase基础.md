@@ -26,7 +26,7 @@
 
 ### 14.5 方法重写的注意事项
 
-- 私有的方法不能够被重写（父类私有成员子类是不能够继承的）
+- **私有的方法不能够被重写**（父类私有成员子类是不能够继承的）
 
 - 子类方法访问权限不能更低（public>默认>私有）
 
@@ -82,30 +82,31 @@
 
 ```java
 public class Granddad{
-        public void drink(){
-            System.out.println("yeye");
-        }
+    public void drink(){
+        System.out.println("yeye");
+    }
+}
+
+public class Father extends Granddad{
+    public void smoke(){
+        System.out.println("baba");
+    }
+}
+
+public class Son extends Father{
+    // 此时，Son类中就同时拥有drink以及smoke方法
+    @Override
+    public void drink() {
+        //            super.drink();// 调用父类的方法
+        System.out.println("ziji");// 定义自己的方法
     }
 
-    public class Father extends Granddad{
-        public void smoke(){
-            System.out.println("baba");
-        }
+    @Override
+    public void smoke() {
+        //            super.smoke();// 调用父类的方法
+        System.out.println("zz");// 定义自己的方法
     }
-
-    public class Son extends Father{
-		// 此时，Son类中就同时拥有drink以及smoke方法
-        @Override
-        public void drink() {
-//            super.drink();
-            System.out.println("ziji");
-        }
-
-        @Override
-        public void smoke() {
-            System.out.println("zz");
-        }
-    }
+}
 ```
 
 
@@ -130,7 +131,7 @@ public class Granddad{
 
 **说明：**
 
-- **private**：被private修饰的方法，只能在**同一个类中**调用方法时才能访问，其他类均访问不到，就算是该类的子类也不能访问到父类中private修饰的方法
+- **private**：被private修饰的方法，只能在**同一个类中**调用方法时才能访问，其他类均访问不到，**就算是该类的子类也不能访问到父类中private修饰的方法**
 - **默认**：默认情况下，该方法可以被同一个类中的其他方法访问到，也可以被**同一个包中**的**该类的子类**或者**同一个包中**的**其他无关类**访问到
 - **protect**：被protect修饰的方法，可以在**同一个类**中，**同一个包中的子类和无关类**，以及**不同包中的子类**访问到
 - **public**：被public修饰的方法，无论是不是同一个类，其他类，还是不同的包中的子类其他类均可访问
@@ -140,9 +141,9 @@ public class Granddad{
 #### 14.7.4 final修饰局部变量
 
 - final修饰基本数据类型变量
-  - final修饰指的是基本数据类型的数据值不能发生改变
+  - **final修饰指的是基本数据类型的数据值不能发生改变**
 - final修饰引用类型数据变量
-  - final修饰指的是不用类型的地址值不能发生变化，但是地址里面的内容是可以发生改变的
+  - final修饰指的是引用类型的地址值不能发生变化，但是地址里面的内容是可以发生改变的
 
 ![image-20230220135805162](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302201358197.png)
 
@@ -208,7 +209,7 @@ s.age = 100;//正确
 - 非静态的成员方法
   - 能访问静态的成员变量
   - 能访问非静态的成员变量
-  - 能访问静态的成员访问
+  - 能访问静态的成员方法
   - 能访问非静态的成员方法
 - 静态的成员方法
   - 能访问静态的成员变量
@@ -251,6 +252,8 @@ s.age = 100;//正确
     编译看父类，运行看子类
 
 **解释：**在编译的时候主要看父类，对于成员变量而言，运行的时候也主要看父类，而对于成员方法而言，运行的时候看子类，因为子类的成员方法有重写，而成员变量没有。
+
+这里的成员方法指的是被子类继承的成员方法，此时如果运行的话，主要看子类是如何对继承的成员方法进行重写的；对于子类中特有的成员方法，父类是不能够访问的。
 
 **代码示例：**
 
@@ -320,9 +323,9 @@ public class AnimalDemo {
 #### 15.1.3 多态的好处与弊端
 
 - 好处
-  - 提高了程序的可扩展性。定义方法的时候，使用父类型作为参数，在使用的时候，是有具体的子类型参与操作
+  - 提高了程序的可扩展性。定义方法的时候，使用父类型作为参数，在使用的时候，使用具体的子类型参与操作
 - 弊端
-  - 不能使用子类的特有成员
+  - **不能使用子类的特有成员**
 
 代码示例：
 
@@ -380,7 +383,7 @@ public class AnimalOperator {
         a.eat();
 
 
-//        a.lookDoor(); // 报错，不能调用子类的特有方法，只能调用子类从父类继承过来的方法
+//        a.lookDoor(); // 报错，父类中不存在该方法，不能调用子类的特有方法，只能调用子类从父类继承过来重写的方法
     }
 }
 ```
@@ -581,6 +584,10 @@ public class Cat extends Animal {
     public void eat() {
         System.out.println("猫爱吃鱼");
     }
+    
+    public void method(){
+        System.out.println("子类特有的方法！");
+    }
 }
 ```
 
@@ -590,6 +597,7 @@ public class AnimalDemo {
         Animal a = new Cat();
         a.eat();
         a.show(); // 虽然cat中没有show方法，但是从父类继承过来了
+//      a.method(); // 子类特有的方法，不能调用
     }
 }
 ```
@@ -653,10 +661,10 @@ public class Cat extends Animal {
     }
 
     public Cat(String name, int age) {
-        super(name, age);
+        super(name, age);// 调用父类的带参构造方法
     }
 
-    public Cat() {
+    public Cat() {// 无参
     }
 }
 ```
@@ -766,10 +774,10 @@ public class Cat implements Jumpping{
 public class InterfaceDemo {
     public static void main(String[] args) {
 //        Cat c = new Cat();
-//        c.jump(); // 正确
+//        c.jump(); // 猫可以跳
 
         Jumpping j = new Cat();
-        j.jump(); // 正确
+        j.jump(); // 猫可以跳
     }
 }
 ```
@@ -778,7 +786,7 @@ public class InterfaceDemo {
 
 #### 15.3.3 接口的成员特点
 
-- 成员变量：接口中没有变量，你定义的所有变量都会默认在变量前加修饰符：public static final
+- 成员变量：接口中没有变量，你定义的所有变量都会默认在变量前加修饰符：**public static final**
 
   **只能是常量，默认修饰符：public static final**
 
@@ -786,13 +794,13 @@ public class InterfaceDemo {
 
 - 构造方法
 
-  没有，因为接口主要是扩展功能的，而没有具体存在
+  **没有**，因为接口主要是扩展功能的，而没有具体存在
 
 - 成员方法
 
   只能是抽象方法
 
-  默认修饰符：public abstract
+  默认修饰符：**public abstract**
 
   关于接口中的方法：JDK8和JDK9中有一些新特性，后面再讲。
 
@@ -1244,6 +1252,21 @@ public class HumanDemo {
 
   ![image-20230220205004735](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302202050803.png)
 
+```java
+public class Test {
+    public static void main(String[] args) {
+        AnimalOperater ao = new AnimalOperater();
+//        ao.useAnimal(new Cat());// 猫爱吃鱼
+//        Cat cat = new Cat();// 猫爱吃鱼
+        Animal cat = new Cat();// 猫爱吃鱼
+        ao.useAnimal(cat);// 猫爱吃鱼
+
+        Animal a = ao.getAnimal();
+        a.eat();// 猫爱吃鱼
+    }
+}
+```
+
 
 
 ### 16.3 接口作为形参和返回值
@@ -1256,6 +1279,25 @@ public class HumanDemo {
 - 示例代码
 
   ![image-20230220210143711](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302202101782.png)
+
+```java
+public class Test {
+    public static void main(String[] args) {
+        CatOperator co = new CatOperator();
+//        co.useJummping(new Cat());//猫可以跳高！
+//        jumpping j = new Cat();
+//        co.useJummping(j);//猫可以跳高！
+        Cat c = new Cat();
+        co.useJummping(c);//猫可以跳高！
+
+        jumpping ju = co.getJ();
+        ju.jump();//猫可以跳高！
+
+    }
+}
+```
+
+
 
 
 
@@ -1313,7 +1355,7 @@ public class HumanDemo {
 
 - **成员内部类的推荐使用方法**
 
-  - 将一个类设计为一个内部类的目的，大多数是不想让外界去访问，所以内部类的定义应该私有化。私有化之后，再提供一个可以让外界调用的方法，方法内部创建内部类对象并调用。
+  - 将一个类设计为一个内部类的目的，大多数是不想让外界去访问，所以**内部类的定义应该私有化**。私有化之后，再提供一个可以让外界调用的方法，方法内部创建内部类对象并调用。
 
 - 示例代码：
 
@@ -1334,7 +1376,7 @@ public class HumanDemo {
   public class InnerDemo{
       public static void main(String[] args){
           // Outer.Inner oi = new Outer().new Inner();
-          // oi,show();
+          // oi.show();
           Outer o = new Outer();
           o.method();
       }
@@ -1406,7 +1448,7 @@ public class OuterDemo{
 
 - 匿名内部类的本质
 
-  - 本质：是一个继承了该类或者实现了该接口的子类匿名对象
+  - 本质：**是一个继承了该类或者实现了该接口的子类匿名对象**
 
 - 匿名内部类的细节
 
@@ -1678,7 +1720,7 @@ public class ObjectDemo {
         Student stu1 = new Student("林青霞", 32);
 
         // 需求，比较两个对象的内容是否相同
-//        System.out.println(stu==stu1); // false
+//        System.out.println(stu==stu1); // false,地址不同 
 
 //        System.out.println(stu.equals(stu1)); // false
         /*
@@ -1691,7 +1733,7 @@ public class ObjectDemo {
             }
             * 所以重写equals()
         * */
-        System.out.println(stu.equals(stu1));
+        System.out.println(stu.equals(stu1));// true
 
         System.out.println(stu.getClass());// class com.javase01.innerclass01.Student
         System.out.println(stu1.getClass()); // class com.javase01.innerclass01.Student

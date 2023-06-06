@@ -124,8 +124,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E> {
 这两个方法。在Itr的实例化中，对 expectedModCount 进行了初始化， 与modCount的值是一样的。
 
 我们可以看出：next调用了一个 checkForComodification 方法，而 checkForComodification 方法中判断了
-modCount 与 expectedModCount 是否相等，如果不相等就抛出异常。其中 modCount 是实际修改的次数，而 expectedModCount
-是预期修改的次数。
+modCount 与 expectedModCount 是否相等，如果不相等就抛出异常。其中 modCount 是实际修改的次数，而 expectedModCount是预期修改的次数。
 
 在Itr被实例化的时候，就把实际修改值modCount赋给了预期修改值expectedModCount。
 
@@ -192,7 +191,7 @@ public class ListDemo {
 
 - 解决方法
 
-  for循环遍历，使用get方法获取元素，可以避免对预期修改值的判断，然后使用集合对象的额操作即可
+  for循环遍历，使用get方法获取元素，可以避免对预期修改值的判断，然后使用集合对象的操作即可
 
 
 
@@ -205,7 +204,7 @@ public class ListDemo {
 
 - ListIterator中常用的方法
 
-  - E next()：返回列表的下一个元素，并且返回光标的位置
+  - E next()：返回列表的下一个元素，并且前进光标的位置
   - boolean hasNext()：如果迭代具有更多的元素，则返回 true
   - E previous()：返回列表中的上一个元素，并且向后移动光标的位置
   - boolean hasPrevious()：如果此列表迭代器在相反的方向遍历列表时具有更多的元素，则返回true
@@ -624,7 +623,19 @@ public class ArrayList<E> extends AbstractList<E>
   }
   ```
   
+  输出：
+  
+  ```
+  王祖贤:32
+  料情绪:33
+  张曼玉:33
+  ```
+  
   注意：由于重写了hashCode方法，因此可以实现让不同的对象返回相同的哈希值。
+  
+  如果没有重写hashCode方法，输出便是4个。
+  
+  
 
 ## 3 HashSet集合概述和特点
 
@@ -668,7 +679,7 @@ public class SetDemo {
 
      如果当前位置有元素存在，则进入第二步
 
-  2. 当前元素的元素和已经存在的元素比较哈希值
+  2. 当前元素和已经存在的元素比较哈希值
 
      如果哈希值不同，则将当前元素进行存储
 

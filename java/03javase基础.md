@@ -94,7 +94,7 @@ Integer.MIN_VALUE // -2^31
 
 - 转换方式
 
-  - 方式一：现将字符串数字成Integer，再调用valueOf()方法
+  - 方式一：将字符串数字成Integer，即调用`valueOf()`方法，然后调用 `intValue()` 方法
   - 方式二：通过Integer静态方法parseInt()进行转换
 
 - 示例代码
@@ -210,6 +210,13 @@ i += 100;  // i = i + 100; i + 100 自动拆箱；i = i + 100 自动装箱
       }
   }
   ```
+  
+  输出：
+
+```
+Tue Jun 06 18:01:52 CST 2023
+Thu Jan 01 09:00:00 CST 1970
+```
 
 
 
@@ -217,8 +224,8 @@ i += 100;  // i = i + 100; i + 100 自动拆箱；i = i + 100 自动装箱
 
 ![image-20230222212355347](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302222123400.png)
 
-- getTime()获取的是从1970年1月1日以后到现在中间时间的毫秒值
-- setTime(long time)是根据你给定的毫秒值，加上1970年1月1日之后的时间
+- `getTime()`获取的是从1970年1月1日以后到现在中间时间的毫秒值
+- `setTime(long time)`是根据你给定的毫秒值，加上1970年1月1日之后的时间
 
 代码示例：
 
@@ -229,6 +236,7 @@ public class DateDemo01 {
         System.out.println(d1);
         System.out.println(d1.getTime()/1000/3600/24/365 + 1970);
 
+        // 以下为同一个作用
         long time = 1000*60*60;
         d1.setTime(time);
         System.out.println(d1);
@@ -568,7 +576,7 @@ public class ExceptionDemo{
         try{
             int[] arr = {1,2,3};
             System.out.println(arr[3]);
-            System.out.println("这里能够访问到吗");
+            System.out.println("这里能够访问到吗");// 这里访问不到
         }catch (ArrayIndexOutofBoundsException e){
             // System.out.println("你访问的数据索引不存在，请回去修改为正确的索引");
             e.printStackTrace();
@@ -637,7 +645,7 @@ public class Throwable{
   - 都是Exception类及其子类
   - 必须是显示处理，否则程序就会发生错误，无法通过编译
 - 运行时异常
-  - 都是RubtimeException类及其子类
+  - 都是RuntimeException类及其子类
   - 无需显示处理，也可以和编译时异常一起处理
 
 
@@ -695,7 +703,7 @@ public class Throwable{
   - 表示出现异常的一种可能，并不一定会发生这些异常
 - throw
   - 用在方法体内，跟的是异常对象名
-  - 由表示抛出异常，有方法体内的语句处理
+  - 表示抛出异常，由方法体内的语句处理
   - 执行throw一定抛出了某种异常
 
 
@@ -750,6 +758,19 @@ Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 3
   ```
 
 实例代码：
+
+- 异常类
+
+  ```java
+  public class ScoreException extends Exception{
+      public ScoreException(){
+          
+      }
+      public ScoreException(String message) {
+          super(message);
+      }
+  }
+  ```
 
 - 老师类
 

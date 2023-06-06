@@ -688,6 +688,8 @@ hello world java100
 
   public String toString(): 通过toString（）就可以实现把StringBuilder转换为String
 
+  还可以使用 `String(StringBuilder builder)`构造方法
+
 - String转换为StringBuilder
 
   public StringBuilder(String s)：通过构造方法就可以实现把String转换为StringBuilder
@@ -714,7 +716,7 @@ hello world java100
 
 - 泛型的使用
 
-  用于约束集合中存储元素的数据类型
+  **用于约束集合中存储元素的数据类型**
 
 ### 13.2 ArrayList类的常用方法
 
@@ -844,7 +846,7 @@ javaee
 
 **注意：子类中所有的构造方法默认都会访问父类中无参的构造方法**
 
-子类会继承父类中的数据，可能还会使用父类的数据。所以，子类初始化之前，一定要先完成父类数据的初始化，原因在于，每一个子类构造方法的第一条默认语句都是：super()
+子类会继承父类中的数据，可能还会使用父类的数据。所以，子类初始化之前，一定要先完成父类数据的初始化，原因在于，**每一个子类构造方法的第一条默认语句都是：super()**
 
 **问题：如果父类中没有无参的构造方法，只有带参的构造方法，怎么办？**
 
