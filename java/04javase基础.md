@@ -631,9 +631,21 @@ public class ArrayList<E> extends AbstractList<E>
   张曼玉:33
   ```
   
-  注意：由于重写了hashCode方法，因此可以实现让不同的对象返回相同的哈希值。
+  注意：由于重写了hashCode方法，因此可以实现让不同的对象（地址不同，但是内容相同）返回相同的哈希值。则认为是重复元素。
   
   如果没有重写hashCode方法，输出便是4个。
+  
+  
+  
+  注：默认的 `equals`方法如下：
+  
+  ```java
+  public boolean equals(Object obj) {
+      return (this == obj);
+  }
+  ```
+  
+  默认的 `equals` 比较的是两个对象的地址值，如果不重写 `equals` 的话，`s3.equals(s4)` 返回的是 false；如果重写了 `equals` 方法的话，那么 `s3.equals(s4)` 返回的就是 true。
   
   
 
@@ -780,7 +792,7 @@ public class HashMap<K,V> extends AbstractMap<K,V> implements Map<K,V>{
 
 > **哈希表**
 
-- JDK8之前，底层采用 **数组+链表** 实现，可以是说一个 元素为链表的数组
+- JDK8之前，底层采用 **数组+链表** 实现，可以说是一个 元素为链表的数组
 - JDK8之后，在长度比较长的时候，底层实现了优化
 
 ![image-20230309235103032](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303092351133.png)
@@ -798,7 +810,7 @@ public class HashMap<K,V> extends AbstractMap<K,V> implements Map<K,V>{
 
 ## 4 LinkedHashSet集合概述和特点
 
-- LInkedHashSet集合的特点
+- LinkedHashSet集合的特点
 
   - 它是由哈希表和链表实现的Set接口，具有可预测的迭代次序
   - 由链表保证元素有序，也就是说元素的存储和去除的顺序是一致的
@@ -993,9 +1005,10 @@ public class Student implements Comparable<Student>{
 - 将对象按照自定义的规则进行排序时，需要 **实现Comparable<Student> 接口** 同时重写 **compareTo**方法
 - return 0时，比较时则认为是同一个元素，所以在使用集合的add方法时，并不能有效添加。
 - return 1时为升序，则认为后添加的元素比先添加的元素大
-- return 0时为降序，则认为后添加的元素比先添加的元素小
+- return -1时为降序，则认为后添加的元素比先添加的元素小
 - this在前时为升序，this在后时为降序
 - String类也实现了 **Comparable<String>接口**，因此也可以使用 compareTo方法
+- compareTo方法相当于 Set唯一性原理里面的第三步，比较内容。
 
 
 
@@ -1083,7 +1096,7 @@ public class TreeSetDemo {
 总结：
 
 - 用TreeSet集合存储自定义对象时，带参构造方法使用的是 **比较器排序** 对元素进行排序
-- 比较器排序，就是让集合构造方法接收 **Comparator的实现类对象**，要重写 compare(T 01, T o2)方法
+- 比较器排序，就是让集合构造方法接收 **Comparator的实现类对象**，要重写 compare(T o1, T o2)方法
 - 重写方法时，一定要注意排序规则必须按照要求的**主要条件和次要条件**来写。
 
 
@@ -1097,6 +1110,128 @@ public class TreeSetDemo {
 ![image-20230310103232559](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303101032637.png)
 
 ![image-20230310103247841](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303101032891.png)
+
+**注：**
+
+- `equals` 方法常用于比较两个对象的内容是否相等
+
+  - 默认的 `equals`方法
+
+    ```java
+    // Object中
+    public boolean equals(Object obj) {
+        return (this == obj);
+    }
+    ```
+
+    ```java
+    // String中
+    public boolean equals(Object anObject) {
+        if (this == anObject) {
+            return true;
+        }
+        if (anObject instanceof String) {
+            String anotherString = (String)anObject;
+            int n = value.length;
+            if (n == anotherString.value.length) {
+                char v1[] = value;
+                char v2[] = anotherString.value;
+                int i = 0;
+                while (n-- != 0) {
+                    if (v1[i] != v2[i])
+                        return false;
+                    i++;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+    ```
+
+  - 重写的 `equals`方法
+
+    ```java
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+    
+        Student student = (Student) o;
+    
+        if (age != student.age) return false;
+        return name != null ? name.equals(student.name) : student.name == null;
+    }
+    ```
+
+- `hashCode` 方法可以使不同的对象具有相同的哈希值，常用于不同的对象，但是内容相同时需要添加到`Set`集合中时。不同的对象添加到`Set`中时，由于地址不同因此会认为是不同的，因此对于内容相同的不同对象，为了避免重复添加，因此可以重写 `hashCode`方法
+
+  - 默认的 `hashCode`方法
+
+    ```java
+    public int hashCode() {
+        int h = hash;
+        if (h == 0 && value.length > 0) {
+            char val[] = value;
+    
+            for (int i = 0; i < value.length; i++) {
+                h = 31 * h + val[i];
+            }
+            hash = h;
+        }
+        return h;
+    }
+    ```
+
+  - 重写的 `hashCode`方法
+
+    ```java
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + age;
+        return result;
+    }
+    ```
+
+- `comparaTo`方法可以让对象按照一定的规则进行排序，在比较两个对象的过程中，如果 `comparaTo` 返回的结果是 0，则认为这两个对象相同，即认为这两个是重复的对象
+
+  - 默认的 `comparaTo`方法
+
+    ```java
+    public int compareTo(String anotherString) {
+        int len1 = value.length;
+        int len2 = anotherString.value.length;
+        int lim = Math.min(len1, len2);
+        char v1[] = value;
+        char v2[] = anotherString.value;
+    
+        int k = 0;
+        while (k < lim) {
+            char c1 = v1[k];
+            char c2 = v2[k];
+            if (c1 != c2) {
+                return c1 - c2;
+            }
+            k++;
+        }
+        return len1 - len2;
+    }
+    ```
+
+  - 重写的 `comparaTo`方法
+
+    ```java
+    @Override
+        public int compareTo(Student o) {
+    //        return 0;
+            int num1 = this.age - o.age;
+            int num = num1==0? this.name.compareTo(o.name) : num1;
+            return num;
+        }
+    ```
+
+
 
 ### 5.4 案例：不重复的随机数
 
@@ -1150,7 +1285,7 @@ public class SetDemo01 {
 
 ## 1 泛型概述
 
-泛型：是JDK5中引入的特性，他提供了编译时类型安全检测机制，该机制允许在编译时检测到非法的类型；
+泛型：是`JDK5`中引入的特性，他提供了编译时类型安全检测机制，该机制允许在编译时检测到非法的类型；
 
 它的本质是 **参数化类型** 也就是说所操作的数据类型被指定为一个参数；
 
@@ -1406,8 +1541,6 @@ public interface GenericInterface<T> {
 
 ```java
 public class GenericImpl<T> implements GenericInterface<T> {
-
-
     @Override
     public void show(T t) {
         System.out.println(t);
@@ -1442,7 +1575,6 @@ public interface Generic2 {
 
 ```java
 public class Generic2Impl implements Generic2 {
-
     @Override
     public <T> void show(T t) {
         System.out.println(t);
@@ -1574,7 +1706,7 @@ public static int sum(int b, int... a){
 总结：
 
 - 这里的变量是一个数组
-- 如果一个方法有很多参数，包含可变参数，可变参数要放到最后
+- 如果一个方法有很多参数，**包含可变参数，可变参数要放到最后**
 
 
 

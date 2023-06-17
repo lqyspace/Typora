@@ -615,7 +615,7 @@ public class ExceptionDemo {
             // public String getMessage() 返回此Throwable的详细消息字符串
             System.out.println(e.getMessage());
 
-            // public String toString()：返回此可抛出的简短猫叔
+            // public String toString()：返回此可抛出的简短描述
             System.out.println(e.toString());
         }
 
@@ -704,7 +704,7 @@ public class Throwable{
 - throw
   - 用在方法体内，跟的是异常对象名
   - 表示抛出异常，由方法体内的语句处理
-  - 执行throw一定抛出了某种异常
+  - 执行throw一定抛出了某种异常，抛出异常之后程序正常继续执行
 
 
 

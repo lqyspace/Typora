@@ -102,7 +102,7 @@ null
 ## 4 Map集合的遍历
 
 - Map集合中操作
-  - 获取所有键的集合。用KetSet()方法实现
+  - 获取所有键的集合。用keySet()方法实现
   - 遍历键的集合，获取每一个键。用增强for实现
   - 根据键去找值。用get(Object key)方法实现
 - 集合遍历的方式
@@ -678,8 +678,8 @@ public class DouDiZhu01 {
 ### 1.1 File概述
 
 - File类的概述
-  - 它是文件和目录路径名的抽象表示
-  - 文件和目录是可以通过File封装成对象的
+  - 它是**文件和目录路径名**的抽象表示
+  - **文件和目录**是可以通过File封装成对象的
   - 对于File而言，其封装的并不是一个真正的文件，仅仅是一个路径名而已。它可以是存在的，也可以是不存在的。将来是要通过具体的操作把这个路径的内容转换为具体存在的
   
 - File类的构造方法
@@ -736,7 +736,7 @@ public class File02 {
         // 如果目录不存在就创建目录并返回true，如果目录存在就不创建目录并返回false
         File f4 = new File(f2, "JavaWeb\\HTML");
 
-        File f5 = new File(f2, "javase.txt");// 使用mkdir方法时，是把javase.txt当做一个文件名
+        File f5 = new File(f2, "javase.txt");// 使用mkdir方法时，是把javase.txt当做一个目录
 
         try {
             System.out.println(f1.createNewFile());//创建一个文件，文件存在就不创建并返回false，文件不存在就创建文件并返回true
@@ -767,7 +767,7 @@ public class File03 {
         System.out.println(f1.exists());
 
         System.out.println(f1.getAbsolutePath());// 返回此抽象路径名的绝对路径名字字符串
-        System.out.println(f1.getPath());// 将次抽象路径名转换为路径名字字符串
+        System.out.println(f1.getPath());// 将此抽象路径名转换为路径名字字符串
         System.out.println(f1.getName());// 返回此抽象路径名表示的文件或目录的名称
 
         System.out.println("---------------------------");
@@ -996,16 +996,16 @@ E:\workspace\javase.txt\java.txt
 
 ###  3.3 字节流写数据
 
-- 字节流抽象积基类
+- 字节流抽象基类
   - InputStream：这个抽象类是表示字节输入流的所有类的超类
   - OutputStream：这个抽象类表示字节输出流的所有类的超类
   - 子类名特点：子类名称都是以父类名称作为子类名称的后轴
-- FileOutputStream：文件传输流用时将数据写入File中
-  - FileOutputStream(String name)：创建文件输出流已指定的名称写入文件
+- FileOutputStream：创建文件输出流已制定的名称写入文件
+  - FileOutputStream(String name)：创建文件输出流以指定的名称写入文件
 - 使用字节输出流写数据的步骤
   - 创建字节输出流对象（调用系统功能创建了文件，创建字节输出流对象，让字节输出流对象指向文件）
   - 调用字节输出流对象的写数据方法
-  - 释放资源（关闭此文件输出流并释放与此相关的联的任何系统资源）
+  - 释放资源（关闭此文件输出流并释放与此相关联的任何系统资源）
 
 ```java
 public class FileOutputStreamDemo01 {
@@ -1018,9 +1018,13 @@ public class FileOutputStreamDemo01 {
         *   2. 创建了字节输出流对象
         *   3. 让字节输出流对象指向创建好的文件
         * */
-
+        
+		byte[] bys = new byte[]{97,98,99};
+        
 //        void write(int b) 将指定的字节写入此文件输出流。
         fos.write(97);// 97 的ascii码是a ，'0' 的ASCII码：48
+//        fos.write(bys); // abc
+        fos.write(bys,0,2); // ab
 
         fos.close();// 关闭此文件输出流并释放与此相关联的任何系统资源
     }
@@ -1186,13 +1190,13 @@ public class FileOutputStreamDemo04 {
   
           // 调用字节输入流对象的读数据方法
           // int read(byte[] b): 从该输入流读取最多b.length个字节的数据到一个字节数组
-          byte[] bys = new byte[5];
+          byte[] bys = new byte[10];
   
           // 第一次读取数据
           int len = fis.read(bys);
-          System.out.println(len);
-  //        System.out.println(new String(bys));
-          System.out.println(new String(bys, 0, len));
+          System.out.println(len);// 5
+  //        System.out.println(new String(bys)); // hello     (后面跟了5个空格)
+          System.out.println(new String(bys, 0, len)); // hello（后面没有空格）
   
   
           // 第二次读取数据
@@ -1428,12 +1432,12 @@ public class CopyJpgDemo {
 
   - BufferedOutputStream：该类实现缓冲输出流。通过设置这样的输出流，应用程序可以向底层输出流写入字节，而不必为写入的每个字节导致底层的系统调用
 
-    - 通过设置一个缓冲区，我们可以一次性将这个数据写入到文件中，底层调用的次数就减少了，而不必像FileOutputStream每次写入一个字节都会进行一次底层调用，因此提高了效率。
-    - 原理：BufferedOutputStream继承于FileOutputStream，提供缓冲输出流功能。缓冲输出流相对于普通输出流的优势：它提供了一个缓冲数组，只有缓冲数组满了或者手动flush时才会向磁盘写入数据，避免了频繁的IO操作。核心思想是，提供一个缓冲数组，写入时首先操作缓冲数组。
+    - 通过设置一个缓冲区，我们可以一次性将这个数据写入到文件中，底层调用的次数就减少了，而不必像OutputStream每次写入一个字节都会进行一次底层调用，因此提高了效率。
+    - 原理：BufferedOutputStream继承于FileOutputStream，提供缓冲输出流功能。缓冲输出流相对于普通输出流的优势：它提供了一个缓冲数组，只有缓冲数组满了或者手动flush时才会向磁盘写入数据，避免了频繁的IO操作。核心思想是，**提供一个缓冲数组，写入时首先操作缓冲数组**。
 
   - BufferedInputStream：创建BufferedInputStream将创建一个内部缓冲区数组。当从流中读取或跳过字节时，内部缓冲区将根据需要从所包含的输入流中 重新填充，一次很多字节
 
-    - 可以减少访问磁盘的次数，提高文件的读取性能，它是FileInputStream类的子类
+    - 可以减少访问磁盘的次数，提高文件的读取性能，它是InputStream类的子类
 
     - BufferedInputStream相对于普通输入流优点是，它有一个缓冲数组，每次调用read()方法，先从缓冲区读取数据，如果读取数据失败，从文件读取新数据到缓冲区，再把缓冲区的内容显示出来
 
@@ -1655,7 +1659,7 @@ public class FileInputDemo {
 
   - InputStreamReader是**从字节流到字符流**的桥梁：它读取字节，并使用指定的[`charset`](../../java/nio/charset/Charset.html)将其**解码为字符**。它使用的字符集可以由名称指定，也可以被明确指定，或者可以接受平台的默认字符集。
 
-    每个调用InputStreamReader的read（）方法之一可能会导致从底层字节输入流读取一个或多个字节。  为了使字节有效地转换为字符，可以从底层流读取比满足当前读取操作所需的更多字节。 
+    每个调用InputStreamReader的read（）方法之一可能会导致从底层字节输入流读取一个或多个字节。  为了使字节有效地转换为字符，**可以从底层流读取比满足当前读取操作所需的更多字节**。 
 
     为了最大的效率，请考虑在BufferedReader中包装一个InputStreamReader。  例如： 
 
@@ -1677,7 +1681,7 @@ public class FileInputDemo {
     为了最大的效率，请考虑在BufferedWriter中包装一个OutputStreamWriter，以避免频繁的转换器调用。  例如： 
 
     ```java
-      Writer out
+      BufferedWriter out
        = new BufferedWriter(new OutputStreamWriter(System.out));
     ```
 
@@ -1711,7 +1715,7 @@ public class ConverDemo {
 
         InputStreamReader isr = new InputStreamReader(new FileInputStream("osw.txt"), "GBK");
 
-//         一次读取一个字符数组的数据
+//         一次读取一个字符数据
         int ch;
         while ((ch=isr.read())!=-1){
             System.out.print((char)ch);
@@ -1832,6 +1836,8 @@ public class CopyJavaDemo {
 - 使用FileReader和FileWriter两个子类，可以方便书写。
 
 - 如果在复制的过程中涉及到编码解码的问题，还是需要使用InputStreamReader和OutputStreamWriter。
+
+- FileReader和FileWriter两个子类是InputStreamReader和OutputStreamWriter的子类。
 
 ```java
 public class CopyJavaImproveDemo {

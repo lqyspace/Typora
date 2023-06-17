@@ -121,7 +121,7 @@ public class TreeSetToFileDemo {
 
 
 
-案例：复制单击文件夹
+案例：复制单级文件夹
 
 ![image-20230319161313911](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303191613970.png)
 
@@ -167,7 +167,7 @@ public class CopyFolderDemo {
 }
 ```
 
-案例：复制多集文件夹
+案例：复制多级文件夹
 
 ![image-20230319211435203](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303192114257.png)
 
@@ -501,7 +501,7 @@ public class CopyJavaDemo {
 }
 ```
 
-注意：这里的 `pw.prrintln()` ，自动执行的刷新；不像传统的那种方式，不再需要刷新和换行。
+注意：这里的 `pw.println()` ，自动执行的刷新；不像传统的那种方式，不再需要刷新和换行。
 
 
 
@@ -950,7 +950,7 @@ public class PropertiesDemo02 {
               return map.put(key, value);
           }
           *
-          * 这就使原本接受Object类型的，现在只能接受String
+          * 这就是原本接受Object类型的，现在只能接受String
         * */
         prop.setProperty("002", "张曼玉2");
         prop.setProperty("003", "张曼玉3");
