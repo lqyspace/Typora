@@ -72,8 +72,7 @@ int nthUglyNumber(int n) {
         // 取三个链表的最小结点
         int min = Math.min(Math.min(product2, product3), product5);
         // 将最小节点接到结果链表上
-        ugly[p] = min;
-        p++;
+        ugly[p++] = min;
         // 接下来的解释，一个丑数可以乘以2,3,5，如果这个丑数乘以2的结果被选作丑数，那么这个丑数就不能
         // 再次乘以2，只有ugly数组中的下一个丑数才可以乘以2.
         // 以下的代码，相当于将ugly中的每个数都经历了一遍*2，*3，*5

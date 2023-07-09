@@ -40,13 +40,11 @@ sprov 大神又用 GO 语言重新开发了一套面板 X-UI。那这套面板�
 #### 更新及安装组件
 
 ```
-apt update -y          # Debian/Ubuntu 命令
-apt install -y curl    #Debian/Ubuntu 命令
-apt install -y socat    #Debian/Ubuntu 命令
+apt update -y                # Debian/Ubuntu 命令
+apt install -y curl socat    #Debian/Ubuntu 命令
 
-yum update -y          #CentOS 命令
-yum install -y curl    #CentOS 命令
-yum install -y socat    #CentOS 命令
+yum update -y               #CentOS 命令
+yum install -y curl socat   #CentOS 命令
 ```
 
 #### 安装 Acme 脚本
@@ -74,10 +72,28 @@ curl https://get.acme.sh | sh
 
 ### 安装 & 升级 X-ui 面板
 
-#### 安装及升级的一键代码
+> **请注意！！！！！**
+>
+> 以下的两个安装命令：
+>
+> 1 为官方原版，但是2021年8月就没有更新了。
+>
+> 2 为改版X-ui，更新速度值得点赞，加入了很多的新功能，包括最新的 Reality 协议、电报群通知等等功能。
+>
+> 大家自由选择，二选一，都可以正常的使用
+
+#### 1. 官方原版安装及升级的一键代码
 
 ```
 bash <(curl -Ls https://raw.githubusercontent.com/vaxilu/x-ui/master/install.sh)
+```
+
+#### 2. 改版X-ui
+
+项目地址：[项目地址](https://v2rayssr.com/go?url=https://github.com/FranzKafkaYu/x-ui)
+
+```linux
+bash <(curl -Ls https://raw.githubusercontent.com/FranzKafkaYu/x-ui/master/install.sh)
 ```
 
 安装成功，浏览器打开X-UI面板：域名端口改成你的
@@ -92,8 +108,5 @@ https://xxx.xxx.xxx.xxx:54321/xui/inbounds
 /root/private.key
 ```
 
-
-
 本文链接：[https://v2rayssr.com/x-ui.html](https://v2rayssr.com/x-ui.html)
 
-[https://luori.xyz/index.php/45/](https://luori.xyz/index.php/45/)
