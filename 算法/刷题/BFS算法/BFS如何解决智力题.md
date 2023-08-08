@@ -1,0 +1,174 @@
+# 如何用BFS算法秒杀各种智力题
+
+滑动拼图游戏大家应该都玩过，下图是一个 4x4 的滑动拼图：
+
+![img](https://labuladong.github.io/algo/images/sliding_puzzle/1.jpeg)
+
+拼图中有一个格子是空的，可以利用这个空着的格子移动其他数字。你需要通过移动这些数字，得到某个特定排列顺序，这样就算赢了。
+
+我小时候还玩过一款叫做「华容道」的益智游戏，也和滑动拼图比较类似：
+
+![img](https://labuladong.github.io/algo/images/sliding_puzzle/2.jpeg)
+
+实际上，滑动拼图游戏也叫数字华容道，你看它俩挺相似的。
+
+那么这种游戏怎么玩呢？我记得是有一些套路的，类似于魔方还原公式。但是我们今天不来研究让人头秃的技巧，**这些益智游戏通通可以用暴力搜索算法解决，所以今天我们就学以致用，用 BFS 算法框架来秒杀这些游戏**。
+
+## 一、题目解析
+
+力扣第 773 题「[滑动谜题](https://leetcode.cn/problems/sliding-puzzle/)」就是这个问题，题目的要求如下：
+
+给你一个 2x3 的滑动拼图，用一个 2x3 的数组 `board` 表示。拼图中有数字 0~5 六个数，其中**数字 0 就表示那个空着的格子**，你可以移动其中的数字，当 `board` 变为 `[[1,2,3],[4,5,0]]` 时，赢得游戏。
+
+请你写一个算法，计算赢得游戏需要的最少移动次数，如果不能赢得游戏，返回 -1。
+
+比如说输入的二维数组 `board = [[4,1,2],[5,0,3]]`，算法应该返回 5：
+
+![img](https://labuladong.github.io/algo/images/sliding_puzzle/5.jpeg)
+
+如果输入的是 `board = [[1,2,3],[5,4,0]]`，则算法返回 -1，因为这种局面下无论如何都不能赢得游戏。
+
+## 二、思路分析
+
+对于这种计算**最小步数**的问题，我们就要敏感地想到 BFS 算法。
+
+这个题目转化成 BFS 问题是有一些技巧的，我们面临如下问题：
+
+1、一般的 BFS 算法，是从**一个起点 `start` 开始，向终点 `target` 进行寻路**，**但是拼图问题不是在寻路，而是在不断交换数字**，这应该怎么转化成 BFS 算法问题呢？
+
+2、即便这个问题能够转化成 BFS 问题，如何处理起点 `start` 和终点 `target`？它们都是数组哎，把数组放进队列，套 BFS 框架，想想就比较麻烦且低效。
+
+首先回答第一个问题，**BFS 算法并不只是一个寻路算法，而是一种暴力搜索算法**，只要涉及暴力穷举的问题，BFS 就可以用，而且可以最快地找到答案。
+
+你想想计算机怎么解决问题的？哪有什么特殊技巧，本质上就是把所有可行解暴力穷举出来，然后从中找到一个最优解罢了。
+
+明白了这个道理，我们的问题就转化成了：**如何穷举出 `board` 当前局面下可能衍生出的所有局面**？这就简单了，看数字 0 的位置呗，和上下左右的数字进行交换就行了：
+
+![img](https://labuladong.github.io/algo/images/sliding_puzzle/3.jpeg)
+
+这样其实就是一个 BFS 问题，**每次先找到数字 0，然后和周围的数字进行交换，形成新的局面加入队列**…… 当第一次到达 `target` 时，就得到了赢得游戏的最少步数。
+
+对于第二个问题，我们这里的 `board` 仅仅是 2x3 的二维数组，所以可以压缩成一个一维字符串。**其中比较有技巧性的点在于，二维数组有「上下左右」的概念，压缩成一维后，如何得到某一个索引上下左右的索引**？
+
+对于这道题，题目说输入的数组大小都是 2 x 3，所以我们可以直接手动写出来这个映射：
+
+```java
+// 记录一维字符串的相邻索引
+int[][] neighbor = new int[][]{
+        {1, 3},
+        {0, 4, 2},
+        {1, 5},
+        {0, 4},
+        {3, 1, 5},
+        {4, 2}
+};
+```
+
+**这个含义就是，在一维字符串中，索引 `i` 在二维数组中的的相邻索引为 `neighbor[i]`**：
+
+![img](https://labuladong.github.io/algo/images/sliding_puzzle/4.jpeg)
+
+那么对于一个 `m x n` 的二维数组，手写它的一维索引映射肯定不现实了，如何用代码生成它的一维索引映射呢？
+
+观察上图就能发现，如果二维数组中的某个元素 `e` 在一维数组中的索引为 `i`，那么 `e` 的左右相邻元素在一维数组中的索引就是 `i - 1` 和 `i + 1`，而 `e` 的上下相邻元素在一维数组中的索引就是 `i - n` 和 `i + n`，其中 `n` 为二维数组的列数。
+
+这样，对于 `m x n` 的二维数组，我们可以写一个函数来生成它的 `neighbor` 索引映射：
+
+```java
+int[][] generateNeighborMapping(int m, int n) {
+    int[][] neighbor = new int[m * n][];
+    for (int i = 0; i < m * n; i++) {
+        List<Integer> neighbors = new ArrayList<>();
+
+        // 如果不是第一列，有左侧邻居
+        if (i % n != 0) neighbors.add(i - 1);
+        // 如果不是最后一列，有右侧邻居
+        if (i % n != n - 1) neighbors.add(i + 1);
+        // 如果不是第一行，有上方邻居
+        if (i - n >= 0) neighbors.add(i - n);
+        // 如果不是最后一行，有下方邻居
+        if (i + n < m * n) neighbors.add(i + n);
+
+        // Java 语言特性，将 List 类型转为 int[] 数组
+        neighbor[i] = neighbors.stream().mapToInt(Integer::intValue).toArray();
+    }
+    return neighbor;
+}
+```
+
+至此，我们就把这个问题完全转化成标准的 BFS 问题了，借助前文 [BFS 算法框架](https://labuladong.github.io/algo/di-ling-zh-bfe1b/bfs-suan-f-463fd/) 的代码框架，直接就可以套出解法代码了：
+
+```java
+class Solution {
+    public int slidingPuzzle(int[][] board) {
+        int m = 2, n = 3;
+        StringBuilder sb = new StringBuilder();
+        String target = "123450";
+
+        // 将board面板转化为字符串，当做BFS的起点
+        for(int i=0; i<m; i++)
+            for(int j=0; j<n; j++)
+                sb.append(board[i][j]);
+
+        int[][] neighbors = neighbor(m, n);
+
+        int steps = 0;
+        Queue<String> q = new LinkedList<>();
+        Set<String> visited = new HashSet<>();
+
+        q.offer(sb.toString());
+        visited.add(sb.toString());
+        while(!q.isEmpty()){
+            int qs = q.size();
+            for(int i=0; i<qs; i++){
+                String cur = q.poll();
+                if(cur.equals(target))
+                    return steps;
+                // 获取0的位置
+                int idx = 0;
+                for(;cur.charAt(idx)!='0'; idx++);
+                // 将0所在的位置与邻居的索引进行交换
+                for(int no: neighbors[idx]){
+                    String ss = swap(cur, idx, no);
+                    // 防止走回头路
+                    if(!visited.contains(ss)){
+                        q.offer(ss);
+                        visited.add(ss);
+                    }
+                }
+            }
+            steps++;
+        }
+        return -1;
+    }
+
+    public String swap(String s, int idx, int no){
+        char[] chs = s.toCharArray();
+        char tmp = chs[idx];
+        chs[idx] = chs[no];
+        chs[no] = tmp;
+        return new String(chs);
+    }
+
+    public int[][] neighbor(int m, int n){
+        int[][] neig = new int[m*n][];
+        for(int i=0; i<m*n; i++){
+            List<Integer> ne = new ArrayList<>();
+
+            // 如果不是第一行，则有上邻居
+            if(i-n>=0) ne.add(i-n);
+            // 如果不是最后一行，则有下邻居
+            if(i+n<m*n) ne.add(i+n);
+            // 如果不是第一列，则有左邻居
+            if(i%n!=0) ne.add(i-1);
+            // 如果不是最后一列，则有右邻居
+            if(i%n!=n-1) ne.add(i+1);
+
+            // 所有第i位的邻居为
+            neig[i] = ne.stream().mapToInt(Integer::intValue).toArray();
+        }
+        return neig;
+    }
+}
+```
+
