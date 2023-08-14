@@ -282,33 +282,89 @@ public class CallableDemo implements Callable<Integer> {
 
 ```java
 public interface Future<V>{
-    
+    public abstract boolean cancel(boolean paramBoolean);// 试图取消一个线程
+    public abstract boolean isCancelled();
+    public abstract boolean isDone();
+    public abstract V get() throws InterruptedException, ExecutionException;
+    public abstarct V get(long paramLong, TimeUnit paramTimeUnit) throws InterruptedException, ExecutionException, TimeoutException;
 }
 ```
 
+cancal方法是试图取消一个线程的执行。
+
+注意是试图取消，并不一定能够执行成功。因为任务可能已经完成，已经取消，或者一些其他的因素不能取消，存在取消失败的可能。boolean类型的返回值是是否取消成功的意思。参数paramBoolean表示是否采用中断的方式取消线程。
+
+所以有时候，为了让任务有能够取消的功能，就是用Callable代替Runnable。如果为了可取消性而是用Future但又不提供可用的结果，则可以声明 Future<?> 形式类型，并返回null作为底层任务的结果。
 
 
 
+### 2.3 FutureTask类
+
+上面介绍了 Future 接口。这个接口有一个实现类叫 FutureTask。FutureTask是实现了RunnableFuture接口的，而RunnableFuture接口同时继承了Runnable接口和Future接口：
+
+```java
+public interface RunnableFuture<V> extends Runnable, Future<V> {
+    /**
+     * Sets this Future to the result of its computation
+     * unless it has been cancelled.
+     */
+    void run();
+}
+```
+
+那 FutureTask类有什么用呢？为什么要有一个 FutureTask类？前面说到了Future只是一个接口，而它里面的 cancel，get，isDone等方法实现起来是非常复杂的。所以JDK就提供了一个FutureTask类供我们使用。
+
+实例代码：
+
+```java
+// 自定义Callable，与上面的一样
+class Task implements Callable<Integer> {
+    @Override
+    public Integer call() throws Exception {
+        // 模拟计算需要1s
+        Thread.sleep(1000);
+        return 2;
+    }
+    
+    public static void main(String args[]) throws Exception {
+        // 使用
+        ExecutorService executor = Executors.newCachedThreadPool();
+        FutureTask<Integer> futureTask = new FutureTask(new Task());
+        executor.submit(futureTask);
+        System.out.println(futureTask.get());
+    }
+}
+```
+
+使用上与第一个demo是有一点小区别的。首先，调用submit方法是没有返回值的。这里实际上是调用的submit(Runnable task)方法的。而上面的Demo，调用的是 submit(Callable<T> task)方法。
+
+然后，这里直接使用 FutureTask直接get取值，而上面的demo是通过submit方法返回的Future去取值。
+
+在很多高并发的环境下，有可能Callable 和 FutureTask会创建多次。FutureTask能够在高并发的环境下确保任务只执行一次。这块有兴趣的同学可以自己去研究一下。
 
 
 
+### 2.4 FutureTask的几个状态
 
+```java
+/**
+  *
+  * state可能的状态转变路径如下：
+  * NEW -> COMPLETING -> NORMAL
+  * NEW -> COMPLETING -> EXCEPTIONAL
+  * NEW -> CANCELLED
+  * NEW -> INTERRUPTING -> INTERRUPTED
+  */
+private volatile int state;
+private static final int NEW          = 0;
+private static final int COMPLETING   = 1;
+private static final int NORMAL       = 2;
+private static final int EXCEPTIONAL  = 3;
+private static final int CANCELLED    = 4;
+private static final int INTERRUPTING = 5;
+private static final int INTERRUPTED  = 6;
+```
 
+> state表示任务的运行状态，初始状态为NEW。运行状态只会在set、setException、cancel方法中终止。COMPLETING、INTERRUPTING是任务完成后的瞬时状态。
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+以上就是Java多线程几个基本的类和接口的介绍。可以打开JDK看看源码，体会这几个类的设计思路和用途吧！
