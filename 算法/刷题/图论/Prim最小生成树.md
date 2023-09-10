@@ -163,7 +163,7 @@ class Prim{
     
     public Prim(List<int[]>[] graph){
         this.graph = graph;
-        this.pq = new PriorityQueue<>((a,b )->{
+        this.pq = new PriorityQueue<>((a,b)->{
             // 按照权重从小到大排序
             return a[2] - b[2];
         });

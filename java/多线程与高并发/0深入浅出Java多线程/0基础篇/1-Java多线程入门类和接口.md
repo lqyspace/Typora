@@ -246,7 +246,9 @@ public interface Cannable<V>{
 }
 ```
 
-那一般是怎么用 `Callable`的呢？`Callable`一般是配合线程池工具 `ExecutorService`来使用的。我们会在后续的章节进行介绍线程池的使用。这里只介绍 `ExecutorService`可以使用 `submit`方法来让一个 `Callable`接口去执行。它会返回一个 `Future`，我们后续的程序可以通过这个 `Future`的 `get`方法得到结果。
+那一般是怎么用 `Callable`的呢？`Callable`一般是配合线程池工具 `ExecutorService`来使用的。
+
+我们会在后续的章节进行介绍线程池的使用。这里只介绍 `ExecutorService`可以使用 `submit`方法来让一个 `Callable`接口去执行。它会返回一个 `Future`，我们后续的程序可以通过这个 `Future`的 `get`方法得到结果。
 
 ```java
 public class CallableDemo implements Callable<Integer> {
@@ -294,7 +296,7 @@ cancal方法是试图取消一个线程的执行。
 
 注意是试图取消，并不一定能够执行成功。因为任务可能已经完成，已经取消，或者一些其他的因素不能取消，存在取消失败的可能。boolean类型的返回值是是否取消成功的意思。参数paramBoolean表示是否采用中断的方式取消线程。
 
-所以有时候，为了让任务有能够取消的功能，就是用Callable代替Runnable。如果为了可取消性而是用Future但又不提供可用的结果，则可以声明 Future<?> 形式类型，并返回null作为底层任务的结果。
+所以有时候，为了让任务有能够取消的功能，就是用Callable代替Runnable。如果为了可取消性而用Future但又不提供可用的结果，则可以声明 Future<?> 形式类型，并返回null作为底层任务的结果。
 
 
 
