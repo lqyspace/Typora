@@ -86,7 +86,7 @@ select是先执行from这一步的。在这个阶段，如果多张表联查，�
 
 当我们完成条件筛选部分之后，就可以筛选表中提取的字段，也就是进入到select 和 distinct 阶段。
 
-首先在select字段阶段会提取想要的字段，然后在distinct阶段过滤掉重复的行，分别得到中间的虚拟表vt5-1和和vt5-2。
+首先在select字段阶段会提取想要的字段，然后在distinct阶段过滤掉重复的行，分别得到中间的虚拟表vt5-1和vt5-2。
 
 当我们提取到了想要的字段数据之后，就可以按照指定的字段进行排序，也就是order by 阶段，得到虚拟表vt6。
 
@@ -122,4 +122,3 @@ select d.dept_name, d.location_id, count(employee_id) as num, avg(salary) as avg
 # 查询每个工种，每个部门的部门名，工种名和最低工资
 select d.job_id, d.dept_name, min(salary) from employees e right join department_id d on d.department_id=e.department_id group by d.job_id, d.dept_name;
 ```
-

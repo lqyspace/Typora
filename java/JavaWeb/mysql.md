@@ -40,7 +40,11 @@
    mysql --host=ip --user=root --password=admin
    ```
 
+## MySQL中的数据类型
 
+![image-20230928000520044](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309280005471.png)
+
+![image-20230928001207394](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309280012469.png)
 
 
 
@@ -56,7 +60,7 @@
 
 3. SQL分类：
 
-   1. Data Definition Language（DDL数据定义语言），如：建库，建表（**create，drop，alter**）
+   1. Data Definition Language（DDL数据定义语言），如：建库，建表（**create，drop，alter，rename，truncate**）
    2. Data Manipulation Language（DML数据操作语言），如：对表中的数据的增删改（**insert，delete，update**）
    3. Data Query Language（DQL数据查询语言），如：对数据的查询（**select**）
    4. Data Control Language（DCL 数据控制语言），如：用户权限的设置（**grant，revoke，commit，rollback，savepoint**）
@@ -84,13 +88,25 @@
       // 按tab键可以自动补全关键字
       ```
 
+      ==注意：==Database不能改名。一些可视化工具可以改名，它是建新表，把所有的表复制到新库中，再删旧库完成。
+
    2. 查询数据库
 
       ```mysql
       // 查询数据库
       show databases;
       // 查看某个数据库的定义信息，即创建语句
-      show create database db3;
+      show create database 库名;
+      或
+      show create database 库名\G;
+      // 查询某个变量
+      show variables like 'character_%';
+      // 查询当前正在使用的数据库
+      select database(); # select database() from dual;
+      // 查看某个库下的所有表
+      show tables from 库名;
+      // 使用数据库
+      use 库名;
       ```
 
    3. 修改数据库
@@ -147,7 +163,7 @@
 
          ```mysql
          // 查看某个数据库中的所有表
-         show tables;
+         show tables; # show tables from 数据库名;
          
          // 查看表结构
          desc 表名;
@@ -162,13 +178,34 @@
          ```mysql
          // 快速创建一个表结构相同的表
          create table 新表名 like 旧表名;
+         
+         // 基于现有的表创建一个新的表,同时把查询的数据导入
+         create table myemp2
+         as 
+         select employee_id, last_name, salary
+         from employees;
+         # 注意：如果在select查询的字段中有别名，则新建的表的字段就是别名
+         
+         
+         # 创建表的时候不要数据
+         create table employee_blank
+         as 
+         select employees
+         where 1=2; // 因为1不可能等于2，因为where始终为false，所以到时候创建的表为空 
          ```
       
       5. 删除表
       
+         - 在MySQL中，当一张数据表没有与其他任何数据存在关联关系时，可以将当前数据表直接删除。
+         - 数据和结构都会被删除
+         - 所有正在运行的相关事务会被提交
+         - 所有相关索引被删除
+         - drop table 语句不能回滚
+      
          ```MySQL
          // 删除表
          drop table 表名;
+         
          
          // 判断表是否存在，如果存在则删除表
          drop table if exists 表名;
@@ -182,20 +219,29 @@
          // 添加表列add
          alter table 表名 add 列名 类型;
          
+         // 添加字段在某个字段的后面或前面
+         alter table 表名 add [column] 字段1 字段类型 [default 默认值] [first|after 字段名2];
+         eg: alter table emp add salary double(10, 2) firt last_name;// 表示把这个字段放在第一位置，参数first/after。
+         
          // 修改列类型modify
-         alter table 表名 modify 列名 新的类型;
+         alter table 表名 modify [column] 列名 新的类型;
          
          // 修改列名change
-         alter table 表名 change 旧列名 新列名 类型;
+         alter table 表名 change [column] 旧列名 新列名 类型;
          
          // 删除列drop
          alter table 表名 drop 列名;
          
          // 修改表名
          rename table 表名 to 新表名;
+         或
+         alter table 旧表名 rename to 新表名;
          
          // 修改字符集
          alter table 表名 character set 字符集;
+         
+         // 删除一个字段
+         alter table myempl drop column email;
          ```
 
 7. DML操作表中的数据
@@ -211,7 +257,47 @@
       insert into 表名 (字段名1， 字段名2...) values (值1，值2...);
       
       // 没有添加数据的字段会使用NULL
+      
+      // 同时插入多条记录
+      insert into 表名 values (val1, val2,...), (val1, val2,...), (val1, val2,...), (val1, val2,...)...;
+      或者
+      insert into 表名(字段1, 字段2,...) values (val1, val2,...), (val1, val2,...), (val1, val2,...), (val1, val2,...)...;
+      
+      
+      // 将查询结果插入到表中
+      insert into 目标表名
+      (tar_column1 [, tar_column2, tar_column3,...])
+      select 
+      (src_column1 [, src_column2, src_column3,...])
+      from 源表名
+      [where condition]
+      # 注意：在insert语句中加入子查询；不必书写values子句；子查询中的值列表应于insert子句中的列名对应
+      eg:
+      insert into emp
+      select * from employees where department_id = 90;
+      
+      // salaries_reps字段的长度不能低于employees表中查询字段的长度
+      // 如果低于的话就有添加不成功的风险
+      insert into salaries_reps(id, salary, commission_pct)
+      select employee_id, last_name, salary, commission_pct
+      from employees
+      where job_id like '%REP%';
       ```
+
+      ==注意：==
+
+      使用insert同时插入多条数据时，MySQL会返回一些执行单行插入时没有的额外信息，这些信息的含义如下：
+
+      - records：表明插入的记录数
+      - duplicates：表明插入时被忽略的记录，原因可能是这些记录包含了重复的主键值。
+      - warnings：表明有问题的数据值，例如发生了数据类型转换。
+
+      > 一个同时插入多行记录的insert语句等同于多个单行插入的insert语句，但是多行的insert语句在处理过程中效率更高。因为MySQL执行单条insert语句插入多行数据比使用多条insert语句块，所以在插入多条记录时最好选择使用单条insert语句的方式插入。
+
+      ==小结：==
+
+      - values也可以写成value，但是标椎的写法是values
+      - 字符和日期型数据应包含在单引号中
 
    2. 更新
 
@@ -222,6 +308,26 @@
       // 带条件
       update 表名 set 字段名=值, 字段名=值... where 字段名=值; -- 更新多个字段
       ```
+
+      ==注意：==
+
+      - 可以一次更新多条数据
+
+      - 如果需要回滚数据，需要保证在DML前，进行设置：set autocommit = false
+
+      - 使用where子句指定需要更新的数据
+
+      - 如果省略where子句，则表中的数据都将被更新
+
+      - 更新中的数据完整性错误
+
+        ```MySQL
+        update employess set department_id=55 where department_id=110;
+        ```
+
+        ![image-20230929183715575](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309291837678.png)
+
+        更新数据的时候是有可能不成功的，原因可能多种多样。对于这个错误有可能是因为约束的原因。
 
    3. 删除
 
@@ -238,27 +344,101 @@
       delete：删除内容，不删除表结构，但不释放空间
       ```
 
+      ==小结==：
+
+      - 使用where子句删除指定的记录
+
+      - 如果省略了where子句，则表中的数据将被全部删除
+
+      - 删除中的数据完整性错误
+
+        ![image-20230929184010670](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309291840759.png)
+
+      
+
+      4. MySQL8新特性：计算列
+
+         什么叫计算列？简单来说就是某一列的值是通过别的列计算得来的。例如，a列值为1，b列值为2，c列不需要手动插入，定义a+b的结果为c的值，那么c就是计算列，是通过别的列计算得来的。
+
+         在MySQL8中，create table 和 alter table都支持增加计算列。
+
+         举例：定义数据表tb1，然后定义字段id，字段a，字段b和字段c，其中字段c为计算列，用于计算a+b的值。首先创建测试表tb1，语句如下：
+
+         ```MySQL
+         create table tb1(
+         id int,
+         a int,
+         b int,
+         c int generated always as (a+b) virtual
+         );
+         ```
+      
+         ![image-20230929184625183](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309291846264.png)
+      
+         
+      
       truncate 与 delete 的区别：
-
+      
       1）条件删除：delete支持条件删除，可以带where，而truncate只能删除整个表
-
-      2）事务回滚：delete是数据库操作语言（DML），操作时原数据会被放到rollback segment中，可以被回滚，所以可以进行回滚和提交操作；而==truncate是数据库定义语言（DDL）==，操作时自动进行commit，不能进行回滚。
-
+      
+      2）事务回滚：delete是数据库操作语言（DML），操作时原数据会被放到rollback segment中，可以被回滚，所以==可以进行回滚和提交操作==；而==truncate是数据库定义语言（DDL）==，操作时自动进行commit，==不能进行回滚==。
+      
+      committ：提交数据。一旦执行commit，则数据则永久被保存在数据库中，意味着数据不可以回滚。
+      
+      rollback：回滚数据。一旦执行rollback，则可以实现数据的回滚，回滚到最近的一次commit。
+      
       3）清理速度：在数据库量比较小的情况，delete和truncate的清理速度差不多大。但是数据量很大的时候就不一样了，由于truncate是不支持回滚的，所以使用的系统和事务日志资源少，速度快。delete语句每删除一行，并在事务日志中为所删除的每行记录一项，固然会慢，但是相对来说比较安全。
-
+      
       4）高水位重置：随着不断的进行表记录的DML操作，会不断提高表的高水位线（HWM），delete操作之后虽然表的数据删除了，但是并没有降低表的高水位（数据会从删除前的最后一行续写），随着DML操作数据库容量也只上升，不会下降。所以如果使用delete删除数据，就算删除很多，在查询时还是和delete操作前速度一样；而truncate操作会重置高水位线（数据重新从1开始），数据库容量也会被重置，之后再进行DML操作也会有所提升。
-
+      
       **小结：**
-
+      
       ​	truncate table 则一次性地从表中删除所有的数据页并不把单独的删除操作记录记入日志中保存，删除行是不能恢复的。并且在删除的过程中不会激活与表有关的删除触发器。执行速度快。
-
+      
       ​	delete table语句可以通过where对要删除的记录进行选择。而使用truncate table将删除表中的所有记录。因此delete语句更加灵活。
-
+      
       ​	drop和truncate都是DDL，不能够激活触发器，因为该操作不记录各行删除；drop删除表，内容连带结构一起删除，表不复存在。
-
+      
       ​	delete命令不能自动提交事务，操作会触发trigger；而truncate，drop命令，执行后会自动提交事务，操作不触发trigger。
-
+      
       ​	速度：一般来说，drop>truncate>delete
+      
+      ​	DDL与DML的说明：
+      
+      ​		DDL的操作一旦执行，就不可以回滚。指令set autocommit = false 对DDL操作失效。(因为在执行完DDL之后，会自动执行commit操作，因此无法回滚)
+      
+      ​		DML的操作默认情况下，一旦执行就不可以回滚。但是，如果在执行DML之前，执行了 set autocommit = false，则执行的DML操作就可以实现回滚。
+      
+      ```MySQL
+      set autocommit = false;
+      delete from emp2;
+      # truncate table emp2;
+      
+      select * from emp2;
+      rollback;
+      
+      select * from emp2;
+      ```
+      
+      > 阿里云开发规范：
+      >
+      > 【参考】truncate table 比 delete 速度快，且使用的系统和事务日志资源少，但truncate无事务且不触发trigger，有可能造成事故，故不建议在开发代码中使用此语句。
+      >
+      > 说明：truncate table 在功能上与不带where子句的delete语句相同。
+
+   **内容扩展：**
+
+   ![image-20230929172255772](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309291722902.png)
+
+   ![image-20230929173805361](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309291738481.png)
+
+   ![image-20230929173831392](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309291738466.png)
+
+   在上面的两次实验中，均只是创建了一个表book1，book2并没有被创建。
+
+   从上面的两次实验中可以看出，MySQL5.7并没有DDL的回滚功能，因此在删除book1和book2时，即使出现了报错，也会把已有的表删除；而在MySQL8中，由于存在回滚的功能，报错的时候会把以前的操作撤销掉。
+
+   
 
 8. DQL查询数据表
 
@@ -881,6 +1061,8 @@
 
       检查约束：check 注：MySQL不支持
 
+      默认值约束：default
+      
       ```mysql
       # 创建主键的方式
       # 1. 在创建表的时候给字段添加主键
@@ -888,12 +1070,39 @@
       # 2. 在已有表中添加主键
       alter table 表名 add primary key(字段名);
       # 注意：一个表中只能有一个主键，但它可以由多个任意列组成，以标识唯一的行，我们称之为联合主键
+      # 特点：
+      # 1. 主键约束相当于：唯一约束+非空约束
+      # 2. 一个表最多只能有一个主键约束，建立主键约束可以在列级上，也可以在表级上创建
+      # 3. 主键约束对应着表中的一列或者多列（复合主键）
+      # 4. 如果是多列组合的复合主键约束，那么这些列都不允许为空值，并且组合的值不允许重复。
+      # 5. MySQL的主键名总是primary，就算自己命名了主键约束名也没用
+      # 6. 当创建主键约束时，系统默认会在所在的列或列组合上建立对应的主键索引（能够根据主键查询的，就根据主键查询，效率更高）。如果删除主键约束了，主键约束对应的索引就会被自动删除
+      # 7. 需要注意的是，不要修改主键字段的值。因为主键是数据记录的唯一标识，如果修改了主键的值，就有可能会被破坏数据的完整性。
+      create table 表名称(
+      	字段名 数据类型 primary key, #列级模式
+      	字段名 数据类型,
+      	字段名 数据类型
+      );
+      create table 表名称(
+      	字段名 数据类型,
+      	字段名 数据类型,
+      	字段名 数据类型,
+      	[constraint 约束名] primary key(字段名) #表级模式
+      );
+      create table 表名称(
+      	字段名 数据类型,
+      	字段名 数据类型,
+      	字段名 数据类型,
+      	[constraint 约束名] primary key(字段名1,字段名2) #表示字段1和字段2的组合是唯一的，也可以有更多个字段
+      );
+      
       
       # 删除主键
       # 删除st5表的主键
       alter table st5 drop primary key;# 一次性删除所有列的主键
       # 错误的删除方式
       alter table st5 modify id int;
+      # 说明：删除主键约束不需要指定主键名，因为一个表只有一个主键，删除主键约束后非空还存在
       
       # 添加主键
       alter table st5 add primary key(id);
@@ -918,12 +1127,71 @@
       alter table 表名 modify id int auto_increment;
       
       # 注：自动增长跟上一条记录有关系，从上一条记录的值+1
+      # 1. 一个列最多能只能有一个自增长列
+      # 2. 当需要产生唯一标识符或顺序值时，可以设置自增长
+      # 3. 自增长列约束的列必须是键列（主键列，唯一键列）
+      # 4. 自增约束的列的数据类型必须是整数类型
+      # 5. 如果自增列指定了0和null，会在当前最大值的基础上自增；如果自增列手动指定了具体值，直接赋值为具体值。
+      
       
       # delete 和 truncate 对自增长的影响
       # delete：删除所有记录以后自增长没有影响
       # truncate: 删除以后，自增长从1重新开始
       ```
-
+      
+      ![image-20230929204519065](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292045696.png)
+      
+      ```MySQL
+      # 如何指定自增约束
+      # 1. 建表时
+      create table 表名称(
+      	字段名 数据类型 primary key auto_increment,
+          字段名 数据类型 unique key not null,
+          字段名 数据类型 unique key,
+          字段名 数据类型 not null default 默认值
+      );
+      
+      create table 表名称(
+      	字段名 数据类型 default 默认值,
+          字段名 数据类型 unique key auto_increment,
+          字段名 数据类型 not null default 默认值,
+          primary key(字段名)
+      );
+      
+      create table employees(
+      	eid int primary key auto_increment,
+          ename varchar(20)
+      );
+      
+      # 2. 表建后
+      alter table 表名称 modify 字段名 数据类型 auto_increment;
+      eg:
+      create table employee(
+      	eid int primary key,
+          ename varchar(20)
+      );
+      alter table employee modify eid int auto_increment;
+      
+      # 删除自动增长约束
+      alter table employee modify eid int;
+      ```
+      
+      ==MySQL8.0新特性——自增变量的持久化==
+      
+      在MySQL8.0之前，自增主键auto_increment的值如果大于max(primary key)+1，在MySQL重启后，会重置auto_increment=max(primary key)+1，这种现象在某些情况下会导致业务主键冲突或者其他难以发现的问题。
+      
+      ![image-20230929212415277](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292124396.png)
+      
+      ![image-20230929212449170](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292124283.png)
+      
+      ![image-20230929212506018](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292125129.png)
+      
+      ==总结：==从上面的实验中可以看，MySQL8.0实现了自增主键的持久化，每次计数器发生改变都会将其重写入重做日志中。如果数据库重启，Innodb会根据重做日志中的信息来初始化计数器的内存值。而MySQL5.7则不能实现计数器的持久化，MySQL每次重启之后，内存中的计数器并不会持久化的内存中，当数据库重启时，该计数器会被初始化。
+      
+      
+      
+      ---
+      
       ```mysql
       # 唯一约束
       # 创建的时候添加唯一约束
@@ -934,6 +1202,108 @@
       alter table st4 drop index name;
       # 创建表以后添加唯一约束
       alter table st4 modify name varchar(20) unique;
+      # 特点
+      # 同一个表中可以有多个唯一约束
+      # 唯一约束可以是某一个列的值唯一，也可以多个列组合的值唯一
+      # 唯一性约束允许列值为空
+      # 在创建唯一约束的时候，如果不给唯一约束命名，就默认和列名相同
+      # MySQL会给唯一约束的列上默认创建一个唯一索引
+      
+      # 唯一约束添加
+      # 建表时
+      create table 表名称(
+      	字段名  数据类型,
+          字段名  数据类型 unique,
+          字段名  数据类型 unique key,
+          字段名  数据类型
+      );
+      create table 表名称(
+      	字段名  数据类型,
+          字段名  数据类型,
+          字段名  数据类型,
+          [constraint 约束名] unique key(字段名|字段列表)
+      );
+      eg:
+      create table student(
+      	sid int,
+      	sname varchar(20),
+      	tel char(11) unique,
+      	cardid char(18) unique key
+      );
+      CREATE TABLE t_course(
+      	cid INT UNIQUE,
+      	cname VARCHAR(100) UNIQUE,
+      	description VARCHAR(200)
+      );
+      CREATE TABLE USER(
+      	id INT NOT NULL,
+      	NAME VARCHAR(25),
+      	PASSWORD VARCHAR(16),
+      	-- 使用表级约束语法
+      	CONSTRAINT uk_name_pwd UNIQUE(NAME,PASSWORD)
+      );
+      
+      # 建表后指定唯一索引
+      # 字段列表中如果是一个字段，表示该列的值唯一。如果是两个或更多的字段，那么复合唯一，即多个字段的组合是唯一的
+      alter table 表名称 add unique key(字段列表);
+      alter table 表名称 modify 字段名 字段类型 unique;
+      eg:
+      ALTER TABLE USER ADD UNIQUE(NAME,PASSWORD);
+      ALTER TABLE USER ADD CONSTRAINT uk_name_pwd UNIQUE(NAME,PASSWORD);
+      ALTER TABLE USER MODIFY NAME VARCHAR(20) UNIQUE;
+      
+      eg:
+      create table student(
+      	sid int primary key,
+      	sname varchar(20),
+      	tel char(11) ,
+      	cardid char(18)
+      );
+      alter table student add unique key(tel);
+      alter table student add unique key(cardid);
+      
+      eg:
+      create table 表名称(
+      	字段名 数据类型,
+      	字段名 数据类型,
+      	字段名 数据类型,
+      	unique key(字段列表) #字段列表中写的是多个字段名，多个字段名用逗号分隔，表示那么是复合唯一，即多个字段的组合是唯一的
+      );
+      
+      #学生表
+      create table student(
+      	sid int, #学号
+      	sname varchar(20), #姓名
+      	tel char(11) unique key, #电话
+      	cardid char(18) unique key #身份证号
+      );
+      #选课表
+      create table student_course(
+      	id int,
+      	sid int,
+      	cid int,
+      	score int,
+      	unique key(sid,cid) #复合唯一
+      );
+      #课程表
+      create table course(
+      	cid int, #课程编号
+      	cname varchar(20) #课程名称
+      );
+      
+      
+      # 删除唯一性约束
+      # 添加唯一性约束的列上也会自动创建唯一索引
+      # 删除唯一约束只能通过删除唯一索引的方式
+      # 删除时需要制定唯一索引名，唯一索引名就和唯一约束名一样
+      # 如果创建唯一约束时未指定名称，如果是单列，就默认和列名相同；如果是组合列，就默认和（）中排在第一个的列名相同。也可以自定义唯一约束明
+      select * from information_schema.table_constraints where table_name = '表名'; # 查看都有哪些约束
+      # 删除唯一约束
+      alter table user drop index uk_name_pwd;
+      # 注意：可以通过 show index from 表名称; 查看表的索引
+      
+      
+      
       
       
       
@@ -942,11 +1312,16 @@
       字段名 字段类型 not null
       # 删除非空约束
       alter table 表名 modify 字段名 字段类型;
+      或
+      alter table 表名 modify 字段名 数据类型 NULL;
       eg:
       alter table st4 modify name varchar(20);
       # 添加非空约束
       alter table st4 modify name varchar(20) not null;
-      
+      # 特点：
+      # 非空约束只能出现在表对象的列上，只能某个列单独限定为非空，不能组合为非空
+      # 一个表中可以有很多列被限定为非空
+      # 空字符串不等于NULL，0也不等于NULL
       
       
       # 默认值
@@ -962,7 +1337,9 @@
       select * from st9;
       insert into st9 (id,name) values (2, '李白');
       ```
-
+      
+      ---
+      
       ```mysql
       # 外键约束
       什么是外键约束：在从表中与主表中主键对应的那一列，我们称之为外键
@@ -981,15 +1358,107 @@
       alter table 从表 add constraint 外键名称 foreign key(外键字段名) references 主表(主键字段名);
       
       # 删除外键
-      alter table 从表 drop foreign key 外键名称;
+      # 第一步先查看约束名和删除外键约束
+      select * from information_schema.table_constraint where table_name = '表名称'; # 查看某个表的约束名
+      alter table 从表 drop foreign key 外键约束名称;
+      # 第二步查看索引名和删除索引。（注意：只能手动删除）
+      show index from 表名称; # 查看某个表的索引名
+      alter table 从表 drop index 索引名;
+      
       # 外键可以为null，但是不可以是不存在的值
+      
       
       思考：如何把部门表中的主键2变为5
       1. 现将员工表中的外键值为2的改为null，然后再将部门表中的主键改为5，最后把员工表中的null改为5。
       
       注：外键可以有多个
+      1. 从表的外键列，必须引用/参考主表的主键或唯一约束的列，为什么？因为被依赖，被参考的值必须是唯一的
+      2. 在创建外键约束时，如果不给外键约束命名，默认名不是列名，而是自动产生一个外键名（例如：student_ibfk_1），也可以指定外键约束名；
+      3. 创建（create）表时就指定外键约束的话，先创建主表，在创建从表
+      4. 删除表时，先删除从表，再删除主表
+      5. 当主表的记录被从表参照时，主表的记录将不被允许删除，如果要删除数据，需要先删除从表中依赖该记录的数据，然后从可以删除主表的数据
+      6. 在从表中建立外键约束，并且一个表中可以有多个外键约束
+      7. 从表的外键列与主表被参照的列名字可以不相同，但是数据类型必须一样，逻辑意义一致。如果类型不一样，创建子表时，就会出现错误 "ERROR 1005 (HY000): Can't create table 'database.tablename'(error:150)"
+      8. 当创建外键约束时，系统默认会在所在列上建立对应的普通索引。但是索引名是外键的约束名。（根据外键查询效率很高）
+      9. 删除外键约束后，必须手动删除对应的索引
+      eg:
+      # 添加外键约束
+      # 1. 建表时
+      create table 主表名字(
+      	字段1 数据类型 primary key,
+          字段2 数据类型
+      );
+      create table 从表名字(
+      	字段1 数据类型 primary key,
+          字段2 数据类型,
+          [constraint <外键约束名>] foreign key(从表的某个字段) references 主表名(被参考的字段)
+      );
+      # （从表的某个字段）的数据类型必须与主表名（被参考字段）的数据类型一致，逻辑一致
+      # （从表的某个字段）的字段名可以与主表名（被参考字段）的字段名一样，也可以不一样
+      -- foreign key：在表级指定子表中的列
+      -- references：标识在父表中的列
+      
+      create table dept(
+      	did int primary key,
+          dname varchar(50)
+      );
+      create table emp(
+      	eid int primary key,
+          ename varchar(5),
+          deptid int,
+          foreign key(did) references dept(did)
+      );
+      # 说明：主表dept必须先创建成功，然后才能创建emp表，指定外键成功
+      # 删除表时，先删除从表emp，再删除主表dept
+      
+      
+      # 2. 建表后
+      # 格式：
+      alter table 从表名 add [constraint 约束名] foreign key(从表的字段) references 主表名（被引用字段） [on update xx][on delete xx];
+      
+      举例：
+      alter table emp1 add [constraint emp_dept_id_fk] foreign key(dept_id) references dept(dept_id);
       ```
-
+      
+      ![image-20230929223802532](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292238679.png)
+      
+      ![image-20230929224114645](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292241767.png)
+      
+      ![image-20230929215431500](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292154621.png)
+      
+      ![image-20230929215452736](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292154820.png)
+      
+      ![image-20230929215634260](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292156416.png)
+      
+      ![image-20230929215730390](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292157520.png)
+      
+      ![image-20230929215857815](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292158938.png)
+      
+      ==总结：约束关系是针对双方==
+      
+      - 添加了外键约束后，主表的修改和删除数据受约束，新增不受约束
+      - 添加了外键约束后，从表的修改和添加数据受约束，删除不受约束
+      - 在从表上建立外键，要求主表必须存在
+      - 删除主表时，要求从表先删除，或将从表中外键引用该主表的关系先删除
+      
+      ==约束等级：==
+      
+      - cascade：在父表（主表）上update/delete记录时，同步update/delete掉子表（从表）的匹配记录
+      - set null：在父表上update/delete记录时，将子表上匹配记录的列设为null，但是要注意字表的外键列不能为not null
+      - no action：如果子表中有匹配的记录，则不允许对父表对应候选键进行update/delete操作
+      - restrict：同no action，都是立即检查外键约束
+      - set default：在可视化工具SQLyog可能显示空白，父表有变更时，子表将外键列设置成一个默认的值，但Innodb不能识别
+      
+      如果没有指定等级，就相当于`restrict`
+      
+      对于外键约束，最好采用：`on update cascade on delete restrict` 的方式。
+      
+      ![image-20230929222056425](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292220533.png)
+      
+      ![image-20230929222118475](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292221607.png)
+      
+      
+      
       ```mysql
       # 级联操作
       在修改和删除主表的主键时，同时更新和删除副表的外键值，称为级联操作
@@ -1009,6 +1478,47 @@
       -- 记住，如果在创建表的时候已经加入了外键，执行此语句会报错，只能先删除外键，然后再执行该语句
       ```
 
+9. check约束
+
+   ![image-20230929224957124](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292250775.png)
+
+   ![image-20230929225024258](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292250377.png)
+
+10. default约束
+
+    ![image-20230929225115265](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292251381.png)
+
+    ![image-20230929225157081](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292251232.png)
+
+    ![image-20230929225308790](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292254409.png)
+
+    ![image-20230929225509263](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292255379.png)
+
+    ![image-20230929225823692](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292258793.png)
+
+    ![image-20230929225901624](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292259775.png)
+
+    ![image-20230929225918351](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309292259450.png)
+
+    ==面试：==
+
+    **1、为什么建表时，加not null default '' 或 default 0**
+
+    答：不想让表中出现null值
+
+    **2、为什么不想要null值**
+
+    （1）不好比较。null值是一个特殊值，比较时只能用专门的is null和is not null来比较。碰到运算符通常返回null。
+
+    （2）效率不高。影响提高索引效率。因此我们往往在建表时not null default "" 或 default 0
+
+    **3、带auto_increment约束的字段值是从1开始的吗**
+
+    答：在MySQL中，auto_increment的初始值默认是1，每新增一条记录，字段值自动加1.设置自增属性（auto_increment）的时候，还可以指定第一条插入记录的自增字段的值，这样新插入的记录的自增字段值从初始值开始递增，如在表中插入第一条记录，==同时指定id为5，则以后插入的记录的id就会从5开始往上加。添加主键时往往需要设置字段自增属性==。
+
+    **4、并不是每个表都可以任意选择存储引擎**
+
+    外键约束不能跨越引擎使用。MySQL支持多种存储引擎，每个表都可以指定一个不同的存储引擎，需要注意的是：外键约束是用来保证数据的参照完整性的，如果表之间需要关联外键，却指定了不同的存储引擎，那么这些表之间是不能创建外键约束的。所以说，存储引擎的选择也不是随意的。
 
 
 
@@ -1858,16 +2368,42 @@ select distinct manager_id from employees where department_id = (select departme
 
 
 # 查询部门的部门号，其中不包括job_id是"ST_CLERK"的部门号
+# 方式一
+select dept_id from departments where dept_id not in (select distinct dept_id from employees where job_id='ST_CLERK');
+# 方式二
+select dept_id from departments d where not exists (select * from employees e where d.dept_id = e.dept_id and e.job_id = 'ST_CLERK');
 
+
+# 选择所有没有管理者的员工的last_name
+select last_name from employees emp where not exists (select * from employees mgr where emp.manager_id = mgr.employee_id);
+
+# 查询员工号，姓名，雇佣时间，工资，其中员工的管理者为 'De Haan'
+select employee_id, last_name, hire_date, salary from employees where manager_id in (select employee_id from employees where last_name = 'De Haan');
+
+select employee_id,last_name, hire_date, salary from employees e1 where exists (select * from employees e2 where e1.manager_id = e2.employee_id and e2.last_name='De Haan');
+
+# 查询各部门中工资比本部门平均工资高的员工的员工号，姓名和工资（相关子查询）
+select employee_id, last_name, salary from employees e1 where salary > (select avg(salary) from employees where dept_id = e1.dept_id);
+
+select e.employee_id, e.salary, e.dept_id from employees e, (select dept_id, avg(salary) avg_sal from employees group by dept_id) t_dept_sal where e.dept_id=t_dept_sal.dept_id and e.salary > t_dept_sal.avg_sal;
+
+# 查询每个部门下的部门人数大于5的部门名称（相关子查询）
+select dept_name from departments d where exists (select * from employees where employee_id = d.dept_id having count(*)>5);
+
+select dept_name from departments d where 5<(select count(*) from employees e where  e.dept_id = d.dept_id);
+
+#查询每个国家下的部门个数大于2的国家编号（相关子查询）
+select country_id from locations l where 2<(select count(*) from departments d where l.dept_id = d.dept_id);
 ```
 
+> **子查询的编写技巧**
+>
+> 从里往外写、从外往里写
 
+如何选择：
 
-
-
-
-
-
+- 如果子查询相对较简单，建议从外往里写，一旦子查询结构复杂，则建议从里往外写。
+- 如果是相关子查询，通常都是从外往里写。
 
 
 
@@ -2044,6 +2580,372 @@ select sum(commission_pct) / count(ifnull(commission_pct, 0)), avg(ifnull(commis
 ```
 
 
+
+## 视图
+
+![image-20230930104507897](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309301045030.png)
+
+> **为什么要使用视图**
+>
+> 视图是部分表而不是所有表，可以针对不同的用户制定不同的查询视图
+
+> **视图的理解**
+>
+> - 视图是一种虚拟表，本身**不具有数据**的，占有很少的内存空间，它是SQL中的重要概念。
+> - 视图建立在已有表的基础上，视图赖以建立的这些表称为**基表**。
+> - 视图的创建和删除只影响视图本身，不影响对应的基表。但是当对视图中的数据进行增加，删除和修改操作时，数据表中的数据会相应地发生变化，反之亦然。
+> - 向视图提供内容的语句为select语句，可以将视图理解为存储起来的select语句
+>   - 在数据库中，视图不会保存数据，数据真正保存在数据表中。当对视图中的数据进行增加、删除和修改操作时，数据表中的数据会发生相应的变化；反之亦然
+>   - 视图中不存在约束，主键，外键的影响
+> - 视图，是向用户提供基表数据的另一种表现形式。通常情况下小型项目的数据库可以不使用视图，但是在大型项目中，以及数据表比较复杂的情况下，视图的价值就凸显出来了，他可以帮助我们把经常查询的结果集放到虚拟表中，提升使用效率，理解和使用起来都非常的方便。
+> - 简化查询；控制数据的访问
+
+
+
+> **创建视图**
+
+- 在create view 语句中嵌入子查询
+
+  ```MySQL
+  create [or replace]
+  [algorithm = {undefined | nerge | temptable}]
+  view 视图名称 [(字段列表)]
+  as  查询语句
+  [with [cascade | local] check option]
+  ```
+
+- 精简版
+
+  ```MySQL
+  create view 视图名称
+  as 查询语句
+  ```
+
+- 创建单表视图
+
+  ```MySQL
+  create view empuv80
+  as 
+  select empployee_id, last_name, salary
+  from employess
+  where department_id=80;
+  
+  # 查询视图
+  select * from empuv80;
+  
+  --- 分割线
+  create view emp_year_salary(ename, year_salary)
+  as
+  select ename, salary*12*(1+IFNULL(commission_pct, 0))
+  from t_employee;
+  
+  
+  create view salvu50
+  as 
+  select employee_id ID_NUMBER, last_name NAME, salary*12 ANN_SALARY
+  from employees
+  where department_id = 50;
+  
+  
+  # 可以把数据复制过来，但是并不能复制约束以及主键
+  create table depts2
+  as 
+  select ename, salary*12*(1+IFNULL(commission_pct, 0))
+  from t_employee; 
+  ```
+
+  说明：
+
+  - 在SQL语句的基础上封装了视图view，这样就会基于SQL语句的结果集形成一张虚拟表
+  - 在创建视图时，如果视图名后面没有字段列表，则视图中字段列表默认和select语句中的字段列表一致。如果select语句中给字段列表取了别名，那么视图中的字段名和别名相同。
+
+- 创建多表联合视图
+
+  ```MySQL
+  create view empview
+  as
+  select e.employee_id emp_id, e.last_name NAME, d.department_name 
+  from employees e, departments d
+  where e.department_id = d.department_id;
+  
+  create view emp_dept
+  as
+  select ename, dname
+  from t_employee left join t_department
+  on t_employee.did = t_department.did
+  
+  create view dept_sum_vu
+  (name, minsal, maxsal, avgsal)
+  as
+  select d.department_name, min(e.salary), max(e.salary), avg(e.salary)
+  from employees e, departments d
+  where e.department_id = d.department_id
+  group by d.department_name;
+  ```
+
+- 利用视图对数据进行格式化
+
+  我们经常需要输出某个格式的内容，比如我们想输出员工姓名和对应的部门名称，对应的格式为emp_name(department_name)，就可以使用视图来完成数据格式化的操作：
+
+  ```MySQL
+  create view emp_depart
+  as
+  select concat(last_name, '(', department_name, ')') as emp_dept
+  from employees e join departments d
+  where e.department_id = d.department_id;
+  ```
+
+- 基于视图创建视图
+
+  ```MySQL
+  create view emp_dept_ysalary
+  as
+  select emp_dept.ename, emp_dept.dname, emp_year_salary.year_salsry
+  from emp_dept inner join emp_year_salary
+  on emp_dept.ename = emp_year_salary.ename;
+  ```
+
+- 查看视图
+
+  语法1：查看数据库的表对象，视图对象
+
+  ```MySQL
+  show tables;
+  ```
+
+  语法2：查看视图的结构
+
+  ```MySQL
+  describe / desc 视图名称;
+  ```
+
+  语法3：查看视图的属性信息
+
+  ```MySQL
+  # 查看视图信息（显示数据表的存储引擎，版本，数据行数和数据大小等）
+  show table status like '视图名称'\G
+  ```
+
+  ![image-20230930143851938](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309301438092.png)
+
+  执行结果显示，注释Comment为view，说明该表为视图表，其它的信息为null，说明这是一个虚表。
+
+  语法4：查看视图的详细定义信息
+
+  ```MySQL
+  show create view 视图名称;# 这个create并不会重新创建一个视图，而是会查看这个视图的创建过程，就跟用show查看表的创建过程一样
+  ```
+
+- 更新视图
+
+  一般情况下，**可以直接向视图更新和删除数据，同时也会影响到基本表的更新和删除**；但是不能直接通过向视图插入数据的方式向基本表插入数据，可以通过下面的两种方式：
+
+  - 插入数据时使用视图所依赖的表：如果视图是基于一个或多个表的查询结果，可以直接向这些表插入数据。视图会自动更新，反映出插入的数据。
+
+    ```MySQL
+    CREATE TABLE users (
+      id INT PRIMARY KEY,
+      name VARCHAR(50)
+    );
+    
+    CREATE TABLE orders (
+      id INT PRIMARY KEY,
+      user_id INT,
+      product VARCHAR(50),
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+    -- 创建视图
+    CREATE VIEW user_orders AS
+    SELECT users.name, orders.product
+    FROM users
+    JOIN orders ON users.id = orders.user_id;
+    -- 插入数据
+    INSERT INTO users (id, name) VALUES (1, 'Alice');
+    INSERT INTO orders (id, user_id, product) VALUES (1, 1, 'Product A');
+    ```
+
+  - 使用触发器向视图插入数据：如果向视图插入数据，可以通过在视图所依赖的表上创建触发器来实现。触发器是在表上执行的特殊操作，比如插入，更新或删除数据时触发。我们可以在触发器中定义向视图插入数据的逻辑。例如，创建一个触发器，当向users表插入数据时，自动向视图user_orders插入相应的数据：
+
+    ```MySQL
+    create trigger insert_user_orders after insert on users
+    for each row
+    insert into user_orders(name, product)
+    values(NEW.name, null);
+    ```
+
+    这样当向users表插入数据时，视图user_orders会自动插入相应的数据。
+
+  - 使用insert into select语句插入数据：如果想直接向视图中插入数据，可以使用insert into select 语句。该语句可以将查询结果插入到目标表中。由于视图是一个查询结果集，我们可以通过select语句查询视图的数据，并将结果插入到目标表中。例如，向视图user_orders中插入数据：
+
+    ```MySQL
+    insert into user_orders(name, product)
+    select users.name, null
+    from users;
+    ```
+
+    这样，视图user_orders会插入与users表中相同的数据。
+
+- 不可更新的视图
+
+  要使视图更新，视图中的行要和底层基本表中的行质检部必须存在**一对一**的关系。另外当视图定义出现如下情况时，试图不支持更新操作：
+
+  - 在定义视图的时候指定了 “algorithm=temptable”，视图将不支持**insert**和**delete**操作；
+  - 视图中不包含基本表中所有被定义为**非空又未指定默认值的列**，视图将不支持insert操作；
+  - 在定义视图的select语句中使用了**join联合查询**，视图将不支持**insert**和**delete**操作；
+  - 在定义视图的select语句后的字段列表中使用了数学表达式或子查询。视图将不支持insert，也不支持update使用了数学表达式，子查询的字段值；
+  - 在定义视图的select语句后的字段列表中使用distinct，聚合函数，group by，having，union等，视图将不支持insert，update，delete
+  - 在定义视图的select语句中包含了子查询，而子查询中引用了from后面的表，试图将不支持insert，update，delete；
+  - 视图定义基于一个 `不可更新视图`
+  - 常量视图
+
+  虽然可以更新视图数据，但总的来说，视图作为虚拟表，主要用于方便查询，不建议更新视图的数据。对视图数据的更改，都是通过对实际数据表里数据的操作票来完成的。
+
+- 修改视图
+
+  ```MySQL
+  # 方式一
+  create or replace view v_emp1
+  as
+  select employee_id, last_name, salary
+  from employees
+  where salary>7000;
+  
+  # 方式二
+  alter view v_emp1
+  as
+  select employee_id, last_name, salary
+  from employees
+  where salary>7000;
+  ```
+
+- 删除视图
+
+  删除视图只会删除视图的定义，并不会删除基表的数据。
+
+  ```MySQL
+  drop view if exists 视图名称;
+  drop view if exists 视图名称1, 视图名称2, ...
+  ```
+
+  说明：基于视图a，b创建了新的视图c，如果将视图a或者b删除，会导致视图c查询失败。这样的视图c需要手动删除或修改，否则影响使用。
+
+- 视图的优缺点：
+
+  ![image-20230930173009787](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309301730127.png)
+
+  ![image-20230930173119850](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309301731975.png)
+
+
+
+## 存储过程与函数
+
+### 1. 理解
+
+**含义：**存储过程英文是stored procedure。他的思想很简单，他的思想很简单，就是一组经过预先编译的SQL语句的封装。
+
+执行过程：存储过程预先存储在MySQL服务器上，需要执行的时候，客户端只需要向服务器端发出调用存储过程的命令，服务端就可以把预先存储好的这一系列SQL语句全部执行。
+
+**好处：**
+
+1、简化操作，提高了sql语句的重用性，减少了开发程序员的压力；
+
+2、减少操作过程中的失误，提高效率；
+
+3、减少网络传输量（客户端不需要把所有的SQL语句通过网络发送给服务器端）
+
+4、减少了SQL语句暴露在网上的风险，也提高了数据查询的安全性
+
+**和视图、函数的对比：**
+
+它和视图有着同样的优点，清晰，安全，还可以减少网络传输量。不过它和视图不同，视图是虚拟表，通常不对底层数据表直接操作，而存储过程是程序化的SQL，可以直接操作底层数据表，相比于面向集合的操作方式，能够实现一些更复杂的数据处理。
+
+一旦存储过程被创建出来，使用它就像使用函数一样简单，我们直接通过调用存储过程名即可。相比较于函数，存储过程是没有返回值的。
+
+### 2. 分类
+
+存储过程的参数类型可以是 in，out和inout。根据这点分类如下：
+
+1. 没有参数（无参数无返回）
+2. 仅仅带in类型（有参数无返回）
+3. 仅仅带out（无参数又返回）
+4. 既带in又带out（有参数有返回）
+5. 带inout（有参数有返回）
+
+注意：in，out，inout都可以在一个存储过程中带多个。
+
+### 3. 创建存储过程
+
+#### 3.1 语法分析
+
+```MySQL
+create procedure 存储过程名(in|out|inout 参数名 参数类型, ...)
+[characteristics ...]
+begin
+	存储过程体
+end
+```
+
+说明：
+
+1、参数前面的符号的意思
+
+- in：当前参数为入参
+
+  存储过程只是读取这个参数的值。如果没有定义参数种类，默认就是in，表示入参。
+
+- out：当前参数为输出参数，也就是表示出参
+
+  执行完成之后，调用这个存储过程的客端或者应用程序就可以读取这个参数返回的值了。
+
+- inout：当前参数既可以为输入参数也可以为输出参数
+
+2、形参类型可以是MySQL数据库中的任意类型。
+
+3、characteristics：表示创建存储过程时指定的对存储过程的约束条件，其取值信息如下：
+
+![image-20231001000217353](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010002263.png)
+
+![image-20231001001213844](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010012941.png)
+
+![image-20231001001254802](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010012876.png)
+
+![image-20231001001425055](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010014139.png)
+
+![image-20231001001459309](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010014385.png)
+
+![image-20231001001759498](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010017716.png)
+
+
+
+### 4 调用存储过程
+
+![image-20231001001927899](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010019033.png)
+
+![image-20231001002036460](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010020788.png)
+
+![image-20231001012006271](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010120334.png)
+
+![image-20231001012201371](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010122667.png)
+
+![image-20231001012747824](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010127906.png)
+
+![image-20231001013152990](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010131068.png)
+
+![image-20231001013243687](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010132756.png)
+
+![image-20231001013324721](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010133798.png)
+
+![image-20231001013740999](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010137077.png)
+
+![image-20231001013812126](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010138218.png)
+
+![image-20231001013834346](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010138413.png)
+
+![image-20231001014104334](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010141408.png)
+
+![image-20231001014134389](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010141531.png)
+
+![image-20231001014430462](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202310010144556.png)
 
 ## 事务
 
