@@ -1194,9 +1194,9 @@ public class TreeSetDemo {
     }
     ```
 
-- `comparaTo`方法可以让对象按照一定的规则进行排序，在比较两个对象的过程中，如果 `comparaTo` 返回的结果是 0，则认为这两个对象相同，即认为这两个是重复的对象
+- `compareTo`方法可以让对象按照一定的规则进行排序，在比较两个对象的过程中，如果 `compareTo` 返回的结果是 0，则认为这两个对象相同，即认为这两个是重复的对象
 
-  - 默认的 `comparaTo`方法
+  - 默认的 `compareTo`方法
 
     ```java
     public int compareTo(String anotherString) {
@@ -1219,7 +1219,7 @@ public class TreeSetDemo {
     }
     ```
 
-  - 重写的 `comparaTo`方法
+  - 重写的 `compareTo`方法
 
     ```java
     @Override
@@ -1443,7 +1443,7 @@ public class GenericDemo02 {
 //        g.show(true);
 //        g.show(12.34);// 没有提供相应的方法
 
-//        使用的是泛型类
+//        使用的是泛型类改进版
 		GenericUtil<String> g1 = new GenericUtil<>();
         GenericUtil<Integer> g2 = new GenericUtil<>();
         GenericUtil<Boolean> g3 = new GenericUtil<>();
@@ -1466,7 +1466,7 @@ true
 
 接下来使用**泛型方法**解决：
 
-泛型类：
+泛型方法：
 
 ```java
 public class GenericUtil{
@@ -1516,7 +1516,7 @@ true
 总结：
 
 - 格式：修饰符 <类型> 返回值类型 方法名(类型 变量名){ }
-- 范例：public <T> void show(T t){ }
+- 范例：public \<T\> void show(T t){ }
 
 
 
