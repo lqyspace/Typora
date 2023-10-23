@@ -1540,7 +1540,7 @@ public interface GenericInterface<T> {
 实现类：
 
 ```java
-public class GenericImpl<T> implements GenericInterface<T> {
+public class GenericImpl<T> implements GenericInterface<T> {// 实现类如果不写泛型T，编译会不通过
     @Override
     public void show(T t) {
         System.out.println(t);
@@ -1574,7 +1574,7 @@ public interface Generic2 {
 实现类：
 
 ```java
-public class Generic2Impl implements Generic2 {
+public class Generic2Impl implements Generic2 {// 泛型方法，所以类上可以不用泛型T
     @Override
     public <T> void show(T t) {
         System.out.println(t);
