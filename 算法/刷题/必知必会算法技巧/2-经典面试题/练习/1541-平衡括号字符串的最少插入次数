@@ -1,0 +1,83 @@
+# 1541-平衡插入字符串的最少次数
+
+[1541-平衡插入字符串的最少次数](https://leetcode.cn/problems/minimum-insertions-to-balance-a-parentheses-string/)，难度中等
+
+![image-20230902114225739](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202309021142800.png)
+
+题解：
+
+第一种不用栈的方式：需要详细看代码的注释，理解解题过程
+
+```java
+class Solution {
+    public int minInsertions(String s) {
+        int need = 0;// 记录需要右括号的数量
+        int res = 0;// 记录一共的操作次数
+        for(char c: s.toCharArray()){
+            if(c=='('){
+                need+=2;// 遇到左括号，右括号需求量+2
+                if(need%2==1){
+                    // 这个判断奇偶性是十分有必要的
+                    // 如果为奇数，因为在遇到这个左括号之前，说明前面还有没匹配完全的情况
+                    // 如果把这个条件删除的话，就不会保证左括号后面是两个连续的右括号
+                    // 举例两个特殊情况：()()))、)()))
+                    // 如果没有这个条件判断奇偶性的话，那么这两种情况就一定会出错
+                    res++;// 添加一个右括号
+                    need--; // 所需的右括号数量就可以减一
+                }
+            } else {
+                need--;// 右括号-1
+                if(need==-1){
+                    // 说明此是需要一个左括号
+                    res++;
+                    // 但是一个左括号对应两个右括号
+                    // 所以此时还需要一个右括号
+                    need+=2;
+                }
+            }
+        }
+        // 最终的结果：他两的加和
+        return res+need;
+    }
+}
+```
+
+> **补充一下“当遇到左括号时，若对右括号的需求量为奇数，需要插入 1 个右括号”，这个地方如果不做判断，那么 "()()))“ 和 ")()))"这两种情况(能造成 need为奇数的也就这两种情况，一个是need==-1造成的，一个是本来就缺一个右括号)结果都为0，也就是说不加奇偶判断的话，是不能保证按"())"顺序闭合的，一个左括号出现之前，必须要保证之前的左括号都已经匹配完或者一个右括号也没匹配，所以这句话应该"当遇到左括号时，若对右括号的需求量为奇数，需要插入 1 个右括号，来匹配之前缺一个右括号的左括号"**
+
+
+
+第二种解法：用栈
+
+```java
+class Solution {
+    public int minInsertions(String s) {
+        int res = 0;
+        // 存储左括号的数量
+        Stack<Character> st = new Stack();
+        for(int i=0; i<s.length(); i++){
+            if(s.charAt(i)=='('){
+                st.push('(');
+            }else {
+                // 看下一位是不是右括号
+                if(i+1<s.length()){
+                    if(s.charAt(i+1)!=')'){
+                        res++;
+                    }else{
+                        i++;
+                    }
+                }else{// 如果不是，则需要添加一个右括号
+                    res++;
+                }
+
+                if(!st.isEmpty()){
+                    st.pop();// 判断右括号的前面是否还有匹配左括号
+                }else{
+                    res++;
+                }
+            }
+        }
+        return res+2*st.size();
+    }
+}
+```
+

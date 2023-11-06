@@ -1,0 +1,132 @@
+# 最后K个数的乘积
+
+[力扣1352](https://leetcode.cn/problems/product-of-the-last-k-numbers/)，难度中等
+
+![image-20230714141539676](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202307141415742.png)
+
+这道题具有代表性，代表自己其实还没有真正掌握 **前缀和**的理念，下面将展示自己最开始的一些想法和最终应该的求解方法。
+
+第一次思考的时候，我想的是我应该倒着计算后 `K`项乘积，因此我就声明了一个后缀积数组 `preMul`，代码如下： 
+
+```java
+class ProductOfNumbers {
+    private ArrayList<Integer> preMul = null;
+    public ProductOfNumbers() {
+        preMul = new ArrayList<>();
+        preMul.add(1);
+    }
+    
+    public void add(int num) {
+        for(int i=preMul.size()-1; i>=0; i--){
+            preMul.set(i, preMul.get(i)*num);
+        }
+        preMul.add(1);
+    }
+    
+    public int getProduct(int k) {
+        return preMul.get(preMul.size()-1-k);
+    }
+}
+
+/**
+ * Your ProductOfNumbers object will be instantiated and called as such:
+ * ProductOfNumbers obj = new ProductOfNumbers();
+ * obj.add(num);
+ * int param_2 = obj.getProduct(k);
+ */
+```
+
+这个代码虽能求出解，但是也存在一个问题，那就是每次 `add`的时候，函数内部都要执行一次时间复杂度为 `O(N)`的更新列表的操作，所以当 `add`函数很多的时候，那么程序就会变得非常低效。因此这道并没有A出结果，而是报了**超时**的错误。
+
+之后我又退而求其次，将更新列表的操作放在 `getProduct(int k)`函数里，但是自己又想了想，干脆不更新列表，直接返回值得了，因此就有了下面的代码：
+
+```java
+class ProductOfNumbers {
+    private ArrayList<Integer> nums = null;
+    public ProductOfNumbers() {
+        nums = new ArrayList<>();
+    }
+    
+    public void add(int num) {
+        nums.add(num);
+    }
+    
+    public int getProduct(int k) {
+        int res = 1;
+        for(int i=nums.size()-1; i>=nums.size()-k; i--){
+            res *= nums.get(i);
+        }
+        return res;
+    }
+}
+
+/**
+ * Your ProductOfNumbers object will be instantiated and called as such:
+ * ProductOfNumbers obj = new ProductOfNumbers();
+ * obj.add(num);
+ * int param_2 = obj.getProduct(k);
+ */
+```
+
+这次虽然通过了测试，但是时间效率还是很低，因此还需要进一步提高效率。
+
+看了官方给的代码。官方的思路是顺着统计前缀乘积，和我的思路的区别就是顺序不一样，所以操作也就不一样。
+
+```java
+class ProductOfNumbers {
+    private ArrayList<Integer> preNul = null;
+    public ProductOfNumbers() {
+        preMul = new ArrayList<>();
+        preMul.add(1);// 方便后续的操作
+    }
+    
+    public void add(int num) {
+        if(num==0){// 如果添加的元素是0，则之前的元素积都废了
+            preMul.clear();
+            preMul.add(1);
+            return;
+        }
+        int n = preMul.size();
+        preMul.add(preMul.get(n-1)*num);
+    }
+    
+    public int getProduct(int k) {
+        int n=preMul.size();
+        if(k>n-1){
+            return 0; // 不足k个元素，说明最后k各元素里面存在0，导致前缀乘积为0
+        }
+        // 计算最后k个元素的乘积
+        return preMul.get(n-1) / preMul.get(n-1-k);
+    }
+}
+
+/**
+ * Your ProductOfNumbers object will be instantiated and called as such:
+ * ProductOfNumbers obj = new ProductOfNumbers();
+ * obj.add(num);
+ * int param_2 = obj.getProduct(k);
+ */
+```
+
+这段代码的效率就很高，总共的时间复杂度也就是 `O(N)`，思路比较简单，就不进行废话了。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
