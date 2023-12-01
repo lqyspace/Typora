@@ -2,6 +2,10 @@
 
 > 安装
 
+windows的SVN服务端下载：[https://www.visualsvn.com/downloads/](https://www.visualsvn.com/downloads/)
+
+windows的SVN客户端下载：[https://tortoisesvn.net/downloads.html](https://tortoisesvn.net/downloads.html)
+
 ```sh
 sudo apt install subversion
 # 查看版本
@@ -353,4 +357,93 @@ runoob项目：`svn://localhost/runoob`
 ### SVN服务的配置与管理
 
 **1、配置自启动服务**
+
+```c
+.\sc.exe create SVNService binpath= "D:\subversion\bin\svnserve.exe --service -r D:\svnroot" start= auto
+.\sc.exe create 服务名称 binpath=空格"svnserve.exe --service -r D:\svn\WebApp" start=空格auto
+```
+
+创建系统服务，服务名称SVNService
+
+**2、批处理文件.bat**
+
+```basic
+net stop SVNService
+net start SVNService
+net restart SVNService
+net status SVNService
+sc delete SVNService # 删除服务
+```
+
+
+
+### 模拟真实的开发环境
+
+![image-20231201202027997](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202312012020628.png)
+
+> 钩子程序
+
+所谓钩子程序就是与一些版本库事件触发的程序，例如新修订版本的创建，或是未版本化属性的修改。
+
+默认情况下，钩子的子目录（版本库/hooks/）中包含各种版本库钩子模板。
+
+![image-20231201202438157](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202312012024206.png)
+
+post-commit.tmpl：事务完成后所触发的钩子程序
+
+钩子程序默认情况下可以采用批处理指令或shell指令来进行编写
+
+
+
+> 通过批处理指令编写钩子程序
+
+1、指定svn服务端工作目录
+
+设置svn服务端的svn路径
+
+```
+SET SVN="D:\svn\bin\svn.exe"
+```
+
+2、指定web服务器工作目录
+
+设置服务器端项目运行目录
+
+```
+SET DIR="D:\server\appache\htdocs\shop"
+```
+
+3、通过update指令实时更新数据到DIR目录中
+
+```
+SVN update %DIR%
+```
+
+4、具体使用步骤
+
+第一步：复制post-commit.tmpl为post-commit.bat文件
+
+第二步：填入相关批处理指令
+
+![image-20231201203308577](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202312012033631.png)
+
+第三步，在Apache目录下创建Shop项目，并更新SVN服务端数据到本地
+
+第四步，更新文件到SVN服务器端，可以在Shop中实时获取到最新数据
+
+第五步，可以通过虚拟主机形式直接访问更新文件
+
+
+
+### SVN扩展程序
+
+> 什么是BAE云引擎
+
+百度应用引擎（BAE）是百度推出的网络应用开发平台。基于BAE架构，使开发者不需要维护任何服务器，只需要简单的上传应用程序，就可以为用户提供服务。
+
+开发者可以基于BAE平台进行PHP，Java，Python，Nodejs应用的开发，编译，发布和调试。
+
+> 如何使用BAE云引擎
+
+BAE地址：https://cloud.baidu.com/product/bae.html
 
