@@ -18,13 +18,13 @@
 
 存储索引的选择：
 
-| 功能         | MyISAM | Memory | InnoDB | Archive |
-| :----------- | :----- | :----- | :----- | :------ |
-| 存储限制     | 265TB  | RAM    | 65TB   | Node    |
-| 支持事务     | No     | No     | Yes    | No      |
-| 支持全文索引 | Yes    | No     | No     | No      |
-| 支持数索引   | Yes    | Yes    | Yes    | No      |
-| 支持哈希索引 | No     | Yes    | No     | No      |
-| 支持数据缓存 | No     | N/A    | Yes    | No      |
-| 支持外键     | No     | No     | Yes    | No      |
+| 功能         | MyISAM  | Memory | InnoDB  | Archive |
+| :----------- | :------ | :----- | :------ | :------ |
+| 存储限制     | 265TB   | RAM    | 65TB    | Node    |
+| 支持事务     | No      | No     | ==Yes== | No      |
+| 支持全文索引 | ==Yes== | No     | No      | No      |
+| 支持数索引   | Yes     | Yes    | Yes     | No      |
+| 支持哈希索引 | No      | Yes    | No      | No      |
+| 支持数据缓存 | No      | N/A    | ==Yes== | No      |
+| 支持外键     | No      | No     | ==Yes== | No      |
 
