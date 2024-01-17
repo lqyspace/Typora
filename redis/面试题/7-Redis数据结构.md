@@ -68,22 +68,3 @@ Hash 类型的底层数据结构是由**压缩列表或哈希表**实现的：
 > TIP
 >
 > 想深入了解这 9 种数据结构，可以看这篇：[2万字 + 40 张图 ｜ 细说 Redis 数据结构](https://xiaolincoding.com/redis/data_struct/data_struct.html)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
