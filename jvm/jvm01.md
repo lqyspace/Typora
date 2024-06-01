@@ -759,7 +759,7 @@ public class Test02 {
 
   - Catalina类加载器还有一个名称：Server类加载器
 
-  - 最开始的tomcat版本，比如5.几的tomcat的目录下是有common，shared，server的目录的；而现在的版本做了简化，没有common，shred和server的目录，所以conf目录下的 caalina.properties的配置文件里并没有配置shared和server的相关配置。
+  - 最开始的tomcat版本，比如5.几的tomcat的目录下是有common，shared，server的目录的；而现在的版本做了简化，没有common，shared和server的目录，所以conf目录下的 catalina.properties的配置文件里并没有配置shared和server的相关配置。
 
     ![image-20230324141109538](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303241411652.png)
 
@@ -793,7 +793,7 @@ public class Test02 {
 
 ![image-20230324145405034](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303241454167.png)
 
-最开始commonLoader，catalinaLoader，sharedLoader都是空的，然后在initClassLoader方法里进行初始化，返回的类仍然是继承自lava的ClassLoader。初始化时使用的是一个创建类的工厂：
+最开始commonLoader，catalinaLoader，sharedLoader都是空的，然后在initClassLoader方法里进行初始化，返回的类仍然是继承自java的ClassLoader。初始化时使用的是一个创建类的工厂：
 
 ![image-20230324145847561](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202303241458737.png)
 

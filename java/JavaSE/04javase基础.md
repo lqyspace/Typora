@@ -230,7 +230,7 @@ public class ListDemo {
   //
   
           System.out.println("-----------------");
-  
+  		stringListIterator = lst.listIterator();
           while (stringListIterator.hasNext()){
               String ss = stringListIterator.next();
               if (ss.equals("world")){
@@ -653,7 +653,7 @@ public class ArrayList<E> extends AbstractList<E>
 
 ### 3.1 HashSet集合的特点
 
-- 底层数据结构是哈希表
+- 底层数据结构是**哈希表**
 - 对集合的迭代顺序不做任何保证，也就是说不保证存储和取出的元素顺序一致
 - 没有带索引的方法，所以不能使用普通for循环遍历
 - 由于是Set集合，所以是不包含重复元素的集合
@@ -1718,7 +1718,7 @@ public static int sum(int b, int... a){
 
 - public static <T> List<T> asList(T... a)：返回由指定数组支持的固定大小的列表
 
-- 返回的集合不能做增删操作，可以做修改操作
+- 返回的集合不能做**增删**操作，可以做修改操作
 
 
 
@@ -1726,7 +1726,7 @@ public static int sum(int b, int... a){
 
 - public static <E> List<E> of(E... elements)：返回包含任意数量元素的不可变列表
 
-- 返回的集合不能做增删改操作
+- 返回的集合不能做**增删改**操作
 
 
 
@@ -1735,7 +1735,7 @@ public static int sum(int b, int... a){
 - public static <E> Set<E> of(E... elements)：返回一个包含任意数量元素的不可变集合
 
 - 在给元素的时候，不能给重复的元素
-- 返回的集合不能做增删操作，没有修改的方法
+- 返回的集合不能做**增删**操作，没有修改的方法
 
 ```java
 public class ArgsDemo01 {

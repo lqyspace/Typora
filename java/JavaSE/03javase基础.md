@@ -106,7 +106,7 @@ Integer.MIN_VALUE // -2^31
           String s = "100";
           
           // 方式一：String --- Integer --- int
-          Integer i = Integer.valueof(s);
+          Integer i = Integer.valueOf(s);
           // public int intValue()
           int x = i.intValue();
           System.out.println(x);

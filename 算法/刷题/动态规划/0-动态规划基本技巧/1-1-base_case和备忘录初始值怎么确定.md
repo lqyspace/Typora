@@ -137,6 +137,41 @@ class Solution {
 }
 ```
 
+另一种解法：
+
+```java
+class Solution {
+    int[][] memo;
+    public int minFallingPathSum(int[][] matrix) {
+        int n = matrix.length;
+        int res = Integer.MAX_VALUE;
+        memo = new int[n][n];
+        for(int[] mm: memo)
+            Arrays.fill(mm, 66666);
+        for(int j=0; j<n; j++){
+            res = Math.min(dp(matrix, 0, j), res);
+        }
+        return res;
+    }
+    private int dp(int[][] matrix, int x, int y){
+        if(x>=matrix.length || y>=matrix[0].length || x<0 || y<0) return 99999;
+        if(x==matrix.length-1)
+            return matrix[x][y];
+        if(memo[x][y]!=66666)
+            return memo[x][y];
+        memo[x][y] = matrix[x][y] + min(
+            dp(matrix, x+1, y),
+            dp(matrix, x+1, y-1),
+            dp(matrix, x+1, y+1)
+        );
+        return memo[x][y];
+    }
+    private int min(int a, int b, int c){
+        return Math.min(a, Math.min(b, c));
+    }
+}
+```
+
 动态规划的迭代解法：
 
 ```java

@@ -206,14 +206,14 @@ int len = arr.length;
 
 ### 10.6 方法的注意事项
 
-- 方法不能嵌套使用
+- **方法不能嵌套使用**
   - 实例代码
 
 ![image-20230219165916166](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302191659201.png)
 
 
 
-- void表示无返回值，可以省略return，也可以单独的书写return，后面不加数据。
+- **void表示无返回值，可以省略return，也可以单独的书写return，后面不加数据**。
   - 实例代码
 
 ![image-20230219170016204](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302191700238.png)
@@ -263,7 +263,7 @@ public static 返回值类型 方法名(参数){
 
   方法重载指同一个类中定义的多个方法之间的关系，满足以下条件的多个方法相互构成重载
 
-  - **多个方法在同一个类型**
+  - **多个方法在同一个类中**
   - **多个方法具有相同的方法名**
   - **多个方法的参数不相同，类型不同或者数量不同**
 
@@ -712,7 +712,7 @@ hello world java100
 
 - ArrayList集合的特点
 
-  底层是数组实现的，长度可以发生变化
+  底层是**数组**实现的，长度可以发生变化
 
 - 泛型的使用
 

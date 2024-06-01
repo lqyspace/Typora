@@ -1776,7 +1776,7 @@ public class OutputStreamWriterDemo {
 
 
 
-### 5.4 字符输流读数据2种方式
+### 5.4 字符流读数据2种方式
 
 - 方法介绍
 

@@ -119,7 +119,7 @@ public class Son extends Father{
 
 #### 14.7.2 import
 
-![image-20230220134044593](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302201340625.png)
+![image-20230220134044593](https://fastly.jsdelivr.net/gh/lqyspace/mypic@master/img1/202403171535106.png)
 
 ![image-20230220134058806](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302201340848.png)
 
@@ -127,7 +127,7 @@ public class Son extends Father{
 
 #### 14.7.3 权限修饰符
 
-![image-20230220134159214](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302201341252.png)
+![image-20230220134159214](https://fastly.jsdelivr.net/gh/lqyspace/mypic@master/img1/202403171535951.png)
 
 **说明：**
 
@@ -143,9 +143,9 @@ public class Son extends Father{
 - final修饰基本数据类型变量
   - **final修饰指的是基本数据类型的数据值不能发生改变**
 - final修饰引用类型数据变量
-  - final修饰指的是引用类型的地址值不能发生变化，但是地址里面的内容是可以发生改变的
+  - final修饰指的是**引用类型的地址值不能发生变化**，但是地址里面的内容是可以发生改变的
 
-![image-20230220135805162](https://raw.githubusercontent.com/lqyspace/mypic/master/PicBed/202302201358197.png)
+![image-20230220135805162](https://fastly.jsdelivr.net/gh/lqyspace/mypic@master/img1/202403171535918.png)
 
 ```java
 final int age = 20;
@@ -166,7 +166,7 @@ s.age = 100;//正确
 - static修饰特点
 
   1. 可以被类的所有对象共享，这也是我们判断是否使用静态关键字的条件
-  2. 可以通过类名调用，也可以通过对象名调用，【推荐使用类名调用】
+  2. 可以通过**类名调用**，也可以通过**对象名调用**，【推荐使用类名调用】
 
 - 示例代码
 
@@ -326,7 +326,7 @@ public class AnimalDemo {
 - 好处
   - 提高了程序的可扩展性。定义方法的时候，使用父类型作为参数，在使用的时候，使用具体的子类型参与操作
 - 弊端
-  - **不能使用子类的特有成员**
+  - **父类不能使用子类的特有成员**
 
 代码示例：
 
@@ -531,7 +531,7 @@ public abstract void eat();
 
 注意：**抽象类中不一定有抽象方法，但是有抽象方法的类一定是抽象类**
 
-- **抽象类不能实例化**
+- **抽象类可以实例化**
 
   抽象类如何实例化呢？参照多态的方式，**通过子类对象实例化**，这叫**抽象类多态**
 
