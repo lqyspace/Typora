@@ -199,5 +199,69 @@ Docker是一个client-server结构的系统,Docker守护进程运行在主机上
 
 ## Docker平台架构图解
 
+Docker是一个C/S模式的架构，后端是一个松耦合架构，众模块各司其职。
+
+Docker运行的基本流程：
+
+- 用户是使用Docker client与Docker Daemon建立通信，并发送请求给后者。
+- Docker Maemon作为Docker架构的主体部分，首先提供Docker Server的功能使其可以接受Docker Client的请求
+- Docker Engine执行Docker内部的一系列工作，每一项工作都是以一个Job的形式存在
+- Job运行过程中，当需要容器镜像时，则从Docker Registry中下载镜像，并通过镜像管理驱动Graph driver将下载镜像以Graph的形式存储。
+- 当需要为Docker创建网络环境时，通过网络管理驱动Network driver创建并配置Docker容器的网络环境
+- 当需要限制Docker容器运行资源或执行用户指令等操作时，则通过Exec driver来完成
+- Libcontainer是一项独立的容器管理包，network driver以及Exec driver都是通过Libcontainer来实现具体对容器进行的操作。
+
+![yuque_diagram](https://fastly.jsdelivr.net/gh/lqyspace/mypic@master/img1/202411282219800.png)
+
+[图片所在文档地址|语雀](https://www.yuque.com/g/xiaoyun-guxn0/bdrip1/agzh88q7ce9m94rr/collaborator/join?token=SSfJOs1sNPOfXROd&source=doc_collaborator# 《Docker平台架构图解》)
 
 
+
+## Docker配置国内镜像源加速器
+
+### 1. 国内镜像源总览[#](https://www.cnblogs.com/cao-lei/p/14448052.html#1689145947)
+
+| 名称         | 路径                                                         |
+| ------------ | ------------------------------------------------------------ |
+| 中国官方镜像 | [https://registry.docker-cn.com](https://registry.docker-cn.com/) |
+| 网易163镜像  | [http://hub-mirror.c.163.com](http://hub-mirror.c.163.com/)  |
+| 中科大镜像   | [https://docker.mirrors.ustc.edu.cn](https://docker.mirrors.ustc.edu.cn/) |
+| 阿里云镜像   | https://[xxx].mirror.aliyuncs.com                            |
+| DaoCloud镜像 | http://[xxx].m.daocloud.io                                   |
+
+### 2. 阿里云镜像源[#](https://www.cnblogs.com/cao-lei/p/14448052.html#3287251753)
+
+  访问：https://cr.console.aliyun.com/#/accelerator
+[![img](https://img2020.cnblogs.com/blog/1119097/202102/1119097-20210225170921811-443270618.png)](https://img2020.cnblogs.com/blog/1119097/202102/1119097-20210225170921811-443270618.png)
+
+### 3. DaoCloud镜像源[#](https://www.cnblogs.com/cao-lei/p/14448052.html#2441363181)
+
+  访问：https://www.daocloud.io/
+[![img](https://img2020.cnblogs.com/blog/1119097/202102/1119097-20210225170932101-949099246.png)](https://img2020.cnblogs.com/blog/1119097/202102/1119097-20210225170932101-949099246.png)
+[![img](https://fastly.jsdelivr.net/gh/lqyspace/mypic@master/img1/202411290057864.png)](https://img2020.cnblogs.com/blog/1119097/202102/1119097-20210225170938389-660372850.png)
+
+### 4. 配置镜像源[#](https://www.cnblogs.com/cao-lei/p/14448052.html#2450768600)
+
+```bash
+vi /etc/docker/daemon.json
+
+# 内容如下：
+{
+  "registry-mirrors": [
+    "https://xx4bwyg2.mirror.aliyuncs.com",
+    "http://f1361db2.m.daocloud.io",
+    "https://registry.docker-cn.com",
+    "http://hub-mirror.c.163.com",
+    "https://docker.mirrors.ustc.edu.cn"
+  ]
+}{}
+
+# 退出并保存
+:wq
+
+# 使配置生效
+systemctl daemon-reload
+
+# 重启Docker
+systemctl restart docker
+```
