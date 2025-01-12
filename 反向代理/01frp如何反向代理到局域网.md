@@ -131,3 +131,20 @@ remotePort = 6666
 ![image-20241207000559865](https://fastly.jsdelivr.net/gh/lqyspace/mypic@master/img1/202412070005902.png)
 
 参考：[https://juejin.cn/post/7357994849386168372](https://juejin.cn/post/7357994849386168372)
+
+```xml
+<xml>
+  <ToUserName><![CDATA[wwdaa40ae2dcb3788a]]></ToUserName>
+  <Encrypt><![CDATA[KcuclSvAlrPinGXJ/mTtJ8wQz9eFKRXyKtE7UiG5wZCou/da6ghfpySoTdZjzBYt645FjHS7g29AFYZoWFYMhe4n4SaXtg7vWkt62gyYLH4/uM3aMYwV2KhqVmKDQ+WEmv3WUmAHAvEOi8ghfdnj6SY70AHq4XwTBXQ2aYIEIjzx+ecWeKBgbcUDJhGCG2k31IVQrDQgmL3IFNlLCXTPgbMK0A+RhRTXtmzIc6FrSrSY86BhEQgLHiky72mHwZTo6OWcR3hjsYO0Th6JXkKo8yPGlaWWrNaNIS7ASxzN5a8fB59xeUKlRCE6UfGdnmKQMuq88pUFYRUjfH7XCFwRYL/lIE8S0K8XhHoHY4Tm+ZtRYaDxht6bGYHUaYGW7TbA]]></Encrypt>
+  <AgentID><![CDATA[]]></AgentID>
+</xml>
+```
+
+```xml
+<xml>
+  <SuiteId><![CDATA[wwdaa40ae2dcb3788a]]></SuiteId>
+  <InfoType><![CDATA[suite_ticket]]></InfoType>
+  <TimeStamp>1733564899</TimeStamp>
+  <SuiteTicket><![CDATA[Fvumc5PsOspuOgQkRsxF236D1kBtFzYz9ty2bj2BCD46ZeOXHEPFZx3rjbiairg4]]></SuiteTicket></xml>
+```
+
